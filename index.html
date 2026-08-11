@@ -114,6 +114,7 @@
   .tag-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
   .tag-name{font-family:'Fraunces',serif;font-weight:600;font-size:16px;}
   .tag-cat{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;border-radius:999px;margin-top:4px;}
+  .tag-plat{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;border-radius:999px;margin-top:4px;background:var(--paper-alt);color:var(--ink);}
   .tag-detail{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:4px 10px;margin-bottom:10px;}
   .tag-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--border);padding-top:10px;}
   .tag-profit-label{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.06em;}
@@ -198,6 +199,7 @@
 <script>
 /* ---------- CONFIG ---------- */
 const CATEGORIES = ['Vêtements femme','Vêtements homme','Enfant','Chaussures','Accessoires','Maison','Autre'];
+const PLATEFORMES = ['Vinted', 'Leboncoin', 'Depop', 'Vestiaire Co.', 'Autre'];
 const CAT_COLORS = ['#B5482E','#3B6E8F','#D9A441','#7A5C9E','#2F6E4F','#8A8F5C','#6B6B6B'];
 const MONTHS_FR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 const QUOTES = [
@@ -238,47 +240,55 @@ const daysBetween = (a,b) => Math.round((new Date(b) - new Date(a)) / 86400000);
 const monthKey = (dateStr) => dateStr ? dateStr.slice(0,7) : null;
 const monthLabel = (key) => { const [y,m] = key.split('-'); return MONTHS_FR[parseInt(m,10)-1] + ' ' + y.slice(2); };
 
-/* ---------- PERSISTENCE ---------- */
-async function loadAll(){
-  try{ const r = await window.storage.get('vinted-settings-v2', false); if(r && r.value) settings = Object.assign(settings, JSON.parse(r.value)); }catch(e){}
+/* ---------- PERSISTENCE (CORRIGÉ AVEC LOCALSTORAGE) ---------- */
+function loadAll(){
+  try{ 
+    const r = localStorage.getItem('vinted-settings-v2'); 
+    if(r) settings = Object.assign(settings, JSON.parse(r)); 
+  } catch(e){}
   try{
-    const r = await window.storage.get('vinted-sales-v2', false);
-    if(r && r.value) sales = JSON.parse(r.value); else await migrateLegacy();
-  }catch(e){ await migrateLegacy(); }
-  try{ const r = await window.storage.get('vinted-stock-v2', false); if(r && r.value) stock = JSON.parse(r.value); }catch(e){}
+    const r = localStorage.getItem('vinted-sales-v2');
+    if(r) sales = JSON.parse(r); else migrateLegacy();
+  } catch(e){ migrateLegacy(); }
+  try{ 
+    const r = localStorage.getItem('vinted-stock-v2'); 
+    if(r) stock = JSON.parse(r); 
+  } catch(e){}
+  
   loaded = true;
   applyTheme();
   renderAll();
 }
-async function migrateLegacy(){
+
+function migrateLegacy(){
   try{
-    const r = await window.storage.get('vinted-sales', false);
-    if(r && r.value){
-      const old = JSON.parse(r.value);
+    const r = localStorage.getItem('vinted-sales');
+    if(r){
+      const old = JSON.parse(r);
       if(Array.isArray(old) && old.length){
         sales = old.map(s => ({
-          id: uid(), nom: s.nom || 'Article', categorie: 'Autre',
+          id: uid(), nom: s.nom || 'Article', categorie: 'Autre', plateforme: 'Vinted',
           achat: s.achat||0, vente: s.vente||0, envoi: s.envoi||0, autres: s.autres||0,
           dateMiseEnLigne: null, dateVente: s.date ? s.date.slice(0,10) : todayStr()
         }));
-        await saveSales();
+        saveSales();
       }
     }
   }catch(e){}
 }
-async function saveSales(){ try{ await window.storage.set('vinted-sales-v2', JSON.stringify(sales), false); }catch(e){ console.error(e); } }
-async function saveStock(){ try{ await window.storage.set('vinted-stock-v2', JSON.stringify(stock), false); }catch(e){ console.error(e); } }
-async function saveSettings(){ try{ await window.storage.set('vinted-settings-v2', JSON.stringify(settings), false); }catch(e){ console.error(e); } }
+function saveSales(){ try{ localStorage.setItem('vinted-sales-v2', JSON.stringify(sales)); }catch(e){ console.error(e); } }
+function saveStock(){ try{ localStorage.setItem('vinted-stock-v2', JSON.stringify(stock)); }catch(e){ console.error(e); } }
+function saveSettings(){ try{ localStorage.setItem('vinted-settings-v2', JSON.stringify(settings)); }catch(e){ console.error(e); } }
 
 /* ---------- THEME ---------- */
 function applyTheme(){
   document.documentElement.setAttribute('data-theme', settings.theme === 'dark' ? 'dark' : 'light');
   document.getElementById('themeBtn').textContent = settings.theme === 'dark' ? '☀️' : '🌙';
 }
-document.getElementById('themeBtn').addEventListener('click', async ()=>{
+document.getElementById('themeBtn').addEventListener('click', ()=>{
   settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
   applyTheme();
-  await saveSettings();
+  saveSettings();
 });
 
 /* ---------- TABS ---------- */
@@ -380,7 +390,7 @@ const BADGES = [
   { id:'goal', emoji:'🎯', title:'Objectif atteint', desc:'Atteins ton objectif mensuel', check:()=> settings.objectifMensuel>0 && monthsReachingGoal(settings.objectifMensuel).length>0 },
 ];
 function evaluateBadges(){ const t = totals(); return BADGES.map(b => ({ ...b, unlocked: b.check(t) })); }
-async function checkBadgesAndCelebrate(){
+function checkBadgesAndCelebrate(){
   const evaluated = evaluateBadges();
   const fresh = evaluated.filter(b => b.unlocked && !settings.unlockedBadges.includes(b.id));
   let changed = false;
@@ -398,7 +408,7 @@ async function checkBadgesAndCelebrate(){
       changed = true;
     }
   }
-  if(changed) await saveSettings();
+  if(changed) saveSettings();
 }
 
 /* ---------- RENDER: DASHBOARD ---------- */
@@ -499,12 +509,13 @@ function renderDashboard(){
 
 /* ---------- RENDER: VENTES ---------- */
 function saleFormHtml(s){
-  s = s || { nom:'', categorie:CATEGORIES[0], achat:'', vente:'', envoi:'', autres:'', dateMiseEnLigne:'', dateVente: todayStr() };
+  s = s || { nom:'', categorie:CATEGORIES[0], plateforme:'Vinted', achat:'', vente:'', envoi:'', autres:'', dateMiseEnLigne:'', dateVente: todayStr() };
   return `
     <div class="form-grid full">
       <div><label>Article</label><input type="text" id="f-nom" value="${esc(s.nom)}" placeholder="Ex : Pull Zara taille M"></div>
     </div>
     <div class="form-grid">
+      <div><label>Plateforme</label><select id="f-plat">${PLATEFORMES.map(p=>`<option value="${p}" ${(s.plateforme||'Vinted')===p?'selected':''}>${p}</option>`).join('')}</select></div>
       <div><label>Catégorie</label><select id="f-cat">${CATEGORIES.map(c=>`<option value="${c}" ${s.categorie===c?'selected':''}>${c}</option>`).join('')}</select></div>
       <div><label>Prix de vente (€)</label><input type="number" step="0.01" min="0" id="f-vente" value="${s.vente||''}" placeholder="0.00"></div>
       <div><label>Prix d'achat (€)</label><input type="number" step="0.01" min="0" id="f-achat" value="${s.achat||''}" placeholder="0.00"></div>
@@ -567,7 +578,7 @@ function renderVentes(){
 function saleCardHtml(s){
   if(editingSaleId === s.id){
     return `<div class="tag" style="--cat-color:${catColor(s.categorie)}">
-      ${saleFormHtml(s).replace('f-nom','fe-nom').replace('f-cat','fe-cat').replace('f-vente','fe-vente').replace('f-achat','fe-achat').replace('f-envoi','fe-envoi').replace('f-autres','fe-autres').replace('f-datevente','fe-datevente').replace('f-datemel','fe-datemel')}
+      ${saleFormHtml(s).replace('f-nom','fe-nom').replace('f-plat','fe-plat').replace('f-cat','fe-cat').replace('f-vente','fe-vente').replace('f-achat','fe-achat').replace('f-envoi','fe-envoi').replace('f-autres','fe-autres').replace('f-datevente','fe-datevente').replace('f-datemel','fe-datemel')}
       <div class="btn-row">
         <button class="btn btn-primary btn-sm" data-save-edit="${s.id}">Enregistrer</button>
         <button class="btn btn-ghost btn-sm" data-cancel-edit="1">Annuler</button>
@@ -585,12 +596,14 @@ function saleCardHtml(s){
         <div>
           <div class="tag-name">${esc(s.nom)}</div>
           <span class="tag-cat" style="background:${catColor(s.categorie)}22;color:${catColor(s.categorie)};">${esc(s.categorie)}</span>
+          <span class="tag-plat">${esc(s.plateforme || 'Vinted')}</span>
         </div>
       </div>
       <div class="tag-detail">${details.join(' · ')}</div>
       <div class="tag-bottom">
         <div><div class="tag-profit-label">Bénéfice</div><div class="tag-profit-value" style="color:${p>=0?'var(--green)':'var(--rust)'}">${fmt(p)}</div></div>
         <div class="tag-actions">
+          <button class="link-btn" data-dup-sale="${s.id}">Dupliquer</button>
           <button class="link-btn edit" data-edit="${s.id}">Modifier</button>
           <button class="link-btn" data-del="${s.id}">Supprimer</button>
         </div>
@@ -600,11 +613,12 @@ function saleCardHtml(s){
 function bindSaleCardEvents(){
   document.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', e=>{ editingSaleId = e.target.getAttribute('data-edit'); renderVentes(); }));
   document.querySelectorAll('[data-cancel-edit]').forEach(b => b.addEventListener('click', ()=>{ editingSaleId = null; renderVentes(); }));
-  document.querySelectorAll('[data-save-edit]').forEach(b => b.addEventListener('click', async e=>{
+  document.querySelectorAll('[data-save-edit]').forEach(b => b.addEventListener('click', e=>{
     const id = e.target.getAttribute('data-save-edit');
     const s = sales.find(x=>x.id===id);
     if(!s) return;
     s.nom = document.getElementById('fe-nom').value.trim() || s.nom;
+    s.plateforme = document.getElementById('fe-plat').value;
     s.categorie = document.getElementById('fe-cat').value;
     s.vente = parseFloat(document.getElementById('fe-vente').value) || 0;
     s.achat = parseFloat(document.getElementById('fe-achat').value) || 0;
@@ -613,33 +627,44 @@ function bindSaleCardEvents(){
     s.dateVente = document.getElementById('fe-datevente').value || s.dateVente;
     s.dateMiseEnLigne = document.getElementById('fe-datemel').value || null;
     editingSaleId = null;
-    await saveSales();
+    saveSales();
     renderAll();
-    await checkBadgesAndCelebrate();
+    checkBadgesAndCelebrate();
   }));
-  document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async e=>{
+  document.querySelectorAll('[data-dup-sale]').forEach(b => b.addEventListener('click', e=>{
+    const id = e.target.getAttribute('data-dup-sale');
+    const s = sales.find(x=>x.id===id);
+    if(!s) return;
+    sales.unshift({ ...s, id: uid(), dateVente: todayStr(), dateMiseEnLigne: todayStr() });
+    saveSales();
+    renderAll();
+    showToast('✅ Vente dupliquée');
+    checkBadgesAndCelebrate();
+  }));
+  document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', e=>{
     const id = e.target.getAttribute('data-del');
     if(!confirm('Supprimer cette vente ?')) return;
     sales = sales.filter(s=>s.id!==id);
-    await saveSales();
+    saveSales();
     renderAll();
   }));
 }
-async function onAddSale(){
+function onAddSale(){
   const nom = document.getElementById('f-nom').value.trim();
   const vente = parseFloat(document.getElementById('f-vente').value) || 0;
   if(!nom || !vente){ alert("Indique au moins le nom de l'article et le prix de vente."); return; }
   sales.push({
     id: uid(), nom, categorie: document.getElementById('f-cat').value,
+    plateforme: document.getElementById('f-plat').value,
     achat: parseFloat(document.getElementById('f-achat').value) || 0,
     vente, envoi: parseFloat(document.getElementById('f-envoi').value) || 0,
     autres: parseFloat(document.getElementById('f-autres').value) || 0,
     dateVente: document.getElementById('f-datevente').value || todayStr(),
     dateMiseEnLigne: document.getElementById('f-datemel').value || null
   });
-  await saveSales();
+  saveSales();
   renderAll();
-  await checkBadgesAndCelebrate();
+  checkBadgesAndCelebrate();
 }
 
 /* ---------- RENDER: STOCK ---------- */
@@ -676,6 +701,7 @@ function stockCardHtml(item){
     return `<div class="tag" style="--cat-color:${catColor(item.categorie)}">
       <div class="tag-name" style="margin-bottom:10px;">Vendre : ${esc(item.nom)}</div>
       <div class="form-grid">
+        <div><label>Plateforme de vente</label><select id="sell-plat">${PLATEFORMES.map(p=>`<option value="${p}">${p}</option>`).join('')}</select></div>
         <div><label>Prix de vente (€)</label><input type="number" step="0.01" min="0" id="sell-vente" value="${item.prixVise||''}"></div>
         <div><label>Frais d'envoi (€)</label><input type="number" step="0.01" min="0" id="sell-envoi" placeholder="0.00"></div>
         <div><label>Autres frais (€)</label><input type="number" step="0.01" min="0" id="sell-autres" placeholder="0.00"></div>
@@ -700,6 +726,7 @@ function stockCardHtml(item){
       <div class="tag-bottom">
         <div></div>
         <div class="tag-actions">
+          <button class="link-btn" data-dup-stock="${item.id}">Dupliquer</button>
           <button class="link-btn edit" data-sell="${item.id}">Vendre</button>
           <button class="link-btn" data-del-stock="${item.id}">Supprimer</button>
         </div>
@@ -709,7 +736,7 @@ function stockCardHtml(item){
 function bindStockCardEvents(){
   document.querySelectorAll('[data-sell]').forEach(b => b.addEventListener('click', e=>{ sellingStockId = e.target.getAttribute('data-sell'); renderStock(); }));
   document.querySelectorAll('[data-cancel-sell]').forEach(b => b.addEventListener('click', ()=>{ sellingStockId = null; renderStock(); }));
-  document.querySelectorAll('[data-confirm-sell]').forEach(b => b.addEventListener('click', async e=>{
+  document.querySelectorAll('[data-confirm-sell]').forEach(b => b.addEventListener('click', e=>{
     const id = e.target.getAttribute('data-confirm-sell');
     const item = stock.find(x=>x.id===id);
     if(!item) return;
@@ -717,26 +744,36 @@ function bindStockCardEvents(){
     if(!vente){ alert('Indique un prix de vente.'); return; }
     sales.push({
       id: uid(), nom: item.nom, categorie: item.categorie, achat: item.achat, vente,
+      plateforme: document.getElementById('sell-plat').value || 'Vinted',
       envoi: parseFloat(document.getElementById('sell-envoi').value) || 0,
       autres: parseFloat(document.getElementById('sell-autres').value) || 0,
       dateMiseEnLigne: item.dateAjout, dateVente: document.getElementById('sell-date').value || todayStr()
     });
     stock = stock.filter(x=>x.id!==id);
     sellingStockId = null;
-    await saveSales(); await saveStock();
+    saveSales(); saveStock();
     renderAll();
     showToast('✅ Vendu ! Ajouté à tes ventes');
-    await checkBadgesAndCelebrate();
+    checkBadgesAndCelebrate();
   }));
-  document.querySelectorAll('[data-del-stock]').forEach(b => b.addEventListener('click', async e=>{
+  document.querySelectorAll('[data-dup-stock]').forEach(b => b.addEventListener('click', e=>{
+    const id = e.target.getAttribute('data-dup-stock');
+    const item = stock.find(x=>x.id===id);
+    if(!item) return;
+    stock.unshift({ ...item, id: uid(), dateAjout: todayStr() });
+    saveStock();
+    renderAll();
+    showToast('✅ Article dupliqué');
+  }));
+  document.querySelectorAll('[data-del-stock]').forEach(b => b.addEventListener('click', e=>{
     const id = e.target.getAttribute('data-del-stock');
     if(!confirm('Retirer cet article du stock ?')) return;
     stock = stock.filter(x=>x.id!==id);
-    await saveStock();
+    saveStock();
     renderAll();
   }));
 }
-async function onAddStock(){
+function onAddStock(){
   const nom = document.getElementById('s-nom').value.trim();
   if(!nom){ alert("Indique le nom de l'article."); return; }
   stock.push({
@@ -745,7 +782,7 @@ async function onAddStock(){
     prixVise: parseFloat(document.getElementById('s-vise').value) || 0,
     dateAjout: document.getElementById('s-date').value || todayStr()
   });
-  await saveStock();
+  saveStock();
   renderAll();
 }
 
@@ -794,11 +831,11 @@ function renderObjectifs(){
         </div>`;
       }).join('')}
   `;
-  document.getElementById('saveGoalBtn').addEventListener('click', async ()=>{
+  document.getElementById('saveGoalBtn').addEventListener('click', ()=>{
     settings.objectifMensuel = parseFloat(document.getElementById('goalInput').value) || 0;
-    await saveSettings();
+    saveSettings();
     renderAll();
-    await checkBadgesAndCelebrate();
+    checkBadgesAndCelebrate();
   });
 }
 
@@ -902,8 +939,8 @@ function renderOutils(){
 }
 
 function exportCsv(){
-  const header = ['Nom','Categorie','Achat','Vente','Envoi','Autres','Benefice','DateMiseEnLigne','DateVente'];
-  const rows = sales.map(s => [s.nom, s.categorie, s.achat, s.vente, s.envoi, s.autres, profit(s).toFixed(2), s.dateMiseEnLigne||'', s.dateVente||'']);
+  const header = ['Nom','Plateforme','Categorie','Achat','Vente','Envoi','Autres','Benefice','DateMiseEnLigne','DateVente'];
+  const rows = sales.map(s => [s.nom, s.plateforme||'Vinted', s.categorie, s.achat, s.vente, s.envoi, s.autres, profit(s).toFixed(2), s.dateMiseEnLigne||'', s.dateVente||'']);
   const csv = [header.join(';'), ...rows.map(r => r.map(v => String(v).replace(/;/g,',')).join(';'))].join('\n');
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
   const a = document.createElement('a');
@@ -929,7 +966,7 @@ async function importJson(e){
     sales = data.sales;
     stock = Array.isArray(data.stock) ? data.stock : [];
     settings = Object.assign(settings, data.settings || {});
-    await saveSales(); await saveStock(); await saveSettings();
+    saveSales(); saveStock(); saveSettings();
     applyTheme();
     renderAll();
     showToast('✅ Sauvegarde importée');
@@ -938,13 +975,13 @@ async function importJson(e){
   }
   e.target.value = '';
 }
-async function resetAll(){
+function resetAll(){
   if(!confirm('Cette action supprime définitivement toutes tes ventes, ton stock et tes réglages. Continuer ?')) return;
   sales = []; stock = [];
   settings = { objectifMensuel: 0, theme: settings.theme, unlockedBadges: [], celebratedMonths: [] };
-  try{ await window.storage.delete('vinted-sales-v2', false); }catch(e){}
-  try{ await window.storage.delete('vinted-stock-v2', false); }catch(e){}
-  try{ await window.storage.set('vinted-settings-v2', JSON.stringify(settings), false); }catch(e){}
+  try{ localStorage.removeItem('vinted-sales-v2'); }catch(e){}
+  try{ localStorage.removeItem('vinted-stock-v2'); }catch(e){}
+  try{ localStorage.setItem('vinted-settings-v2', JSON.stringify(settings)); }catch(e){}
   renderAll();
   showToast('Toutes les données ont été réinitialisées');
 }
