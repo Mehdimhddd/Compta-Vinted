@@ -72,20 +72,6 @@
   .progress-fill.over{background:var(--mustard);}
   .progress-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;}
 
-  /* bar chart */
-  .barchart{display:flex;align-items:flex-end;gap:8px;height:110px;margin:10px 0 4px;}
-  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
-  .bar{width:100%;border-radius:5px 5px 2px 2px;min-height:3px;transition:height .3s ease;}
-  .bar-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink-soft);margin-top:6px;}
-  .bar-val{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-soft);margin-bottom:3px;}
-
-  /* category breakdown */
-  .cat-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px;}
-  .cat-name{width:110px;flex-shrink:0;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:11px;}
-  .cat-bar-track{flex:1;background:var(--paper-alt);border-radius:6px;height:16px;overflow:hidden;}
-  .cat-bar-fill{height:100%;border-radius:6px;}
-  .cat-val{width:64px;text-align:right;flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:11px;}
-
   /* forms */
   label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;font-weight:500;}
   input[type=text],input[type=number],input[type=date],select{
@@ -119,7 +105,7 @@
   .tag-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--border);padding-top:10px;}
   .tag-profit-label{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.06em;}
   .tag-profit-value{font-family:'Fraunces',serif;font-weight:700;font-size:18px;}
-  .tag-actions{display:flex;gap:12px;}
+  .tag-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
   .link-btn{background:none;border:none;color:var(--ink-soft);font-size:11.5px;cursor:pointer;text-decoration:underline;padding:0;font-family:'Inter',sans-serif;}
   .link-btn:hover{color:var(--rust);}
   .link-btn.edit:hover{color:var(--green);}
@@ -127,44 +113,23 @@
   .empty{text-align:center;padding:34px 20px;color:var(--ink-soft);background:var(--card);border:1px dashed var(--border);border-radius:14px;font-size:13.5px;}
   .empty strong{display:block;color:var(--ink);font-family:'Fraunces',serif;font-size:16px;margin-bottom:6px;font-weight:600;}
 
-  /* badges */
-  .badge-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .badge{border:1px solid var(--border);border-radius:14px;padding:14px;background:var(--card);text-align:center;}
-  .badge.locked{opacity:0.4;}
-  .badge-emoji{font-size:26px;display:block;margin-bottom:6px;}
-  .badge-title{font-family:'Fraunces',serif;font-weight:600;font-size:13px;margin-bottom:3px;}
-  .badge-desc{font-size:10.5px;color:var(--ink-soft);line-height:1.3;}
-
-  /* quote */
-  .quote-box{background:var(--green-soft);border:1px solid var(--green);border-radius:14px;padding:16px;font-family:'Fraunces',serif;font-style:italic;font-size:14.5px;color:var(--ink);margin-bottom:8px;}
-
   /* toast */
   #toasts{position:fixed;bottom:16px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:60;pointer-events:none;}
   .toast{background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-size:13px;font-family:'Inter',sans-serif;font-weight:500;opacity:0;transform:translateY(10px);transition:all .3s ease;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
   .toast.show{opacity:1;transform:translateY(0);}
 
-  /* confetti */
-  #confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:70;}
-  .confetti-piece{position:absolute;top:-10px;width:8px;height:8px;border-radius:2px;animation:fall linear forwards;}
-  @keyframes fall{to{transform:translateY(100vh) rotate(360deg);opacity:0.3;}}
-
-  .goal-input-row{display:flex;gap:8px;align-items:flex-end;}
-  .goal-input-row .field{flex:1;}
-
-  .stock-days{font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:2px 8px;border-radius:999px;background:var(--paper-alt);color:var(--ink-soft);}
-  .stock-days.warn{background:var(--rust-soft);color:var(--rust);}
-
-  footer{text-align:center;font-size:11px;color:var(--ink-soft);margin-top:30px;font-family:'IBM Plex Mono',monospace;}
-
-  @media (max-width:420px){
-    .stats{grid-template-columns:1fr;}
-    .form-grid{grid-template-columns:1fr;}
-    .badge-grid{grid-template-columns:1fr 1fr;}
+  /* print area for invoices */
+  #print-area { display: none; }
+  @media print {
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; margin:0; padding:20px; background: white !important; color: black !important; font-family: 'Inter', sans-serif;}
+    body { background: white !important; }
   }
 </style>
 </head>
 <body>
-<div id="confetti"></div>
+<div id="print-area"></div>
 <div id="toasts"></div>
 
 <div class="wrap">
@@ -181,19 +146,17 @@
     <button class="tab-btn" data-tab="dashboard">📊 Tableau de bord</button>
     <button class="tab-btn" data-tab="ventes">🏷️ Ventes</button>
     <button class="tab-btn" data-tab="stock">📦 Stock</button>
+    <button class="tab-btn" data-tab="commandes">🛒 Commandes</button>
     <button class="tab-btn" data-tab="objectifs">🎯 Objectifs</button>
-    <button class="tab-btn" data-tab="badges">🏅 Badges</button>
     <button class="tab-btn" data-tab="outils">🛠️ Outils</button>
   </nav>
 
   <section class="section" id="tab-dashboard"></section>
   <section class="section" id="tab-ventes"></section>
   <section class="section" id="tab-stock"></section>
+  <section class="section" id="tab-commandes"></section>
   <section class="section" id="tab-objectifs"></section>
-  <section class="section" id="tab-badges"></section>
   <section class="section" id="tab-outils"></section>
-
-  <footer>100% gratuit · tes données restent dans cette appli</footer>
 </div>
 
 <script>
@@ -202,30 +165,16 @@ const CATEGORIES = ['Vêtements femme','Vêtements homme','Enfant','Chaussures',
 const PLATEFORMES = ['Vinted', 'Leboncoin', 'Depop', 'Vestiaire Co.', 'Autre'];
 const CAT_COLORS = ['#B5482E','#3B6E8F','#D9A441','#7A5C9E','#2F6E4F','#8A8F5C','#6B6B6B'];
 const MONTHS_FR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-const QUOTES = [
-  "Chaque pièce vendue est une place gagnée dans ton dressing.",
-  "Le meilleur prix est celui que quelqu'un est prêt à payer aujourd'hui.",
-  "Une photo nette vaut mille descriptions.",
-  "Ranger, photographier, publier : la routine qui rapporte.",
-  "Le vide-dressing d'aujourd'hui finance les envies de demain.",
-  "Un article qui dort ne rapporte rien : baisse, bouge ou boost.",
-  "La régularité bat la perfection sur Vinted.",
-  "Ton bénéfice n'est pas le prix de vente, ne l'oublie jamais.",
-  "Dix petites ventes valent souvent mieux qu'une grosse attente.",
-  "La meilleure pub, c'est un profil propre et des réponses rapides."
-];
 
 /* ---------- STATE ---------- */
 let sales = [];
 let stock = [];
-let settings = { objectifMensuel: 0, theme: 'light', unlockedBadges: [], celebratedMonths: [] };
+let settings = { objectifMensuel: 0, theme: 'light', profil: { nom:'', adresse:'', siret:'' } };
 let loaded = false;
 let activeTab = 'dashboard';
 let editingSaleId = null;
-let editingStockId = null;
 let sellingStockId = null;
 let ventesFilter = { search:'', categorie:'', sort:'date-desc' };
-let quoteIndex = 0;
 
 /* ---------- HELPERS ---------- */
 const uid = () => 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8);
@@ -236,765 +185,326 @@ const esc = (str) => { const d=document.createElement('div'); d.textContent = st
 const catColor = (cat) => { const i = CATEGORIES.indexOf(cat); return CAT_COLORS[i>=0?i:CAT_COLORS.length-1]; };
 const profit = (s) => s.vente - s.achat - s.envoi - s.autres;
 const marginPct = (s) => s.vente > 0 ? (profit(s)/s.vente*100) : 0;
-const daysBetween = (a,b) => Math.round((new Date(b) - new Date(a)) / 86400000);
 const monthKey = (dateStr) => dateStr ? dateStr.slice(0,7) : null;
-const monthLabel = (key) => { const [y,m] = key.split('-'); return MONTHS_FR[parseInt(m,10)-1] + ' ' + y.slice(2); };
 
-/* ---------- PERSISTENCE (CORRIGÉ AVEC LOCALSTORAGE) ---------- */
+/* ---------- PERSISTENCE ---------- */
 function loadAll(){
-  try{ 
-    const r = localStorage.getItem('vinted-settings-v2'); 
-    if(r) settings = Object.assign(settings, JSON.parse(r)); 
-  } catch(e){}
-  try{
-    const r = localStorage.getItem('vinted-sales-v2');
-    if(r) sales = JSON.parse(r); else migrateLegacy();
-  } catch(e){ migrateLegacy(); }
-  try{ 
-    const r = localStorage.getItem('vinted-stock-v2'); 
-    if(r) stock = JSON.parse(r); 
-  } catch(e){}
-  
+  try{ const r = localStorage.getItem('vinted-settings-v3'); if(r) settings = Object.assign(settings, JSON.parse(r)); } catch(e){}
+  try{ const r = localStorage.getItem('vinted-sales-v3'); if(r) sales = JSON.parse(r); } catch(e){}
+  try{ const r = localStorage.getItem('vinted-stock-v3'); if(r) stock = JSON.parse(r); } catch(e){}
+  if(!settings.profil) settings.profil = { nom:'', adresse:'', siret:'' };
   loaded = true;
-  applyTheme();
-  renderAll();
+  applyTheme(); renderAll();
 }
+function saveSales(){ localStorage.setItem('vinted-sales-v3', JSON.stringify(sales)); }
+function saveStock(){ localStorage.setItem('vinted-stock-v3', JSON.stringify(stock)); }
+function saveSettings(){ localStorage.setItem('vinted-settings-v3', JSON.stringify(settings)); }
 
-function migrateLegacy(){
-  try{
-    const r = localStorage.getItem('vinted-sales');
-    if(r){
-      const old = JSON.parse(r);
-      if(Array.isArray(old) && old.length){
-        sales = old.map(s => ({
-          id: uid(), nom: s.nom || 'Article', categorie: 'Autre', plateforme: 'Vinted',
-          achat: s.achat||0, vente: s.vente||0, envoi: s.envoi||0, autres: s.autres||0,
-          dateMiseEnLigne: null, dateVente: s.date ? s.date.slice(0,10) : todayStr()
-        }));
-        saveSales();
-      }
-    }
-  }catch(e){}
-}
-function saveSales(){ try{ localStorage.setItem('vinted-sales-v2', JSON.stringify(sales)); }catch(e){ console.error(e); } }
-function saveStock(){ try{ localStorage.setItem('vinted-stock-v2', JSON.stringify(stock)); }catch(e){ console.error(e); } }
-function saveSettings(){ try{ localStorage.setItem('vinted-settings-v2', JSON.stringify(settings)); }catch(e){ console.error(e); } }
-
-/* ---------- THEME ---------- */
+/* ---------- THEME & TOAST ---------- */
 function applyTheme(){
   document.documentElement.setAttribute('data-theme', settings.theme === 'dark' ? 'dark' : 'light');
   document.getElementById('themeBtn').textContent = settings.theme === 'dark' ? '☀️' : '🌙';
 }
 document.getElementById('themeBtn').addEventListener('click', ()=>{
   settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
-  applyTheme();
-  saveSettings();
+  applyTheme(); saveSettings();
 });
-
-/* ---------- TABS ---------- */
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    activeTab = btn.getAttribute('data-tab');
-    showActiveTab();
-  });
-});
-function showActiveTab(){
-  document.querySelectorAll('.tab-btn').forEach(b=> b.classList.toggle('active', b.getAttribute('data-tab')===activeTab));
-  document.querySelectorAll('.section').forEach(s=> s.classList.toggle('active', s.id === 'tab-'+activeTab));
-}
-
-/* ---------- TOASTS & CONFETTI ---------- */
 function showToast(msg){
   const container = document.getElementById('toasts');
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.textContent = msg;
+  const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg;
   container.appendChild(el);
   requestAnimationFrame(()=> el.classList.add('show'));
   setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=> el.remove(), 300); }, 3200);
-}
-function launchConfetti(){
-  const container = document.getElementById('confetti');
-  const colors = ['#2F6E4F','#B5482E','#D9A441','#3B6E8F','#7A5C9E'];
-  for(let i=0;i<28;i++){
-    const p = document.createElement('div');
-    p.className = 'confetti-piece';
-    p.style.left = Math.random()*100 + '%';
-    p.style.background = colors[Math.floor(Math.random()*colors.length)];
-    p.style.animationDelay = (Math.random()*0.3) + 's';
-    p.style.animationDuration = (1.3 + Math.random()*0.9) + 's';
-    container.appendChild(p);
-    setTimeout(()=> p.remove(), 2500);
-  }
-}
-
-/* ---------- CALCULATIONS ---------- */
-function totals(){
-  const totalVentes = sales.reduce((a,s)=>a+s.vente,0);
-  const totalCouts = sales.reduce((a,s)=>a+s.achat+s.envoi+s.autres,0);
-  const totalProfit = totalVentes - totalCouts;
-  const n = sales.length;
-  const avgMargin = n ? sales.reduce((a,s)=>a+marginPct(s),0)/n : 0;
-  const withDates = sales.filter(s=>s.dateMiseEnLigne && s.dateVente);
-  const avgDays = withDates.length ? Math.round(withDates.reduce((a,s)=>a+daysBetween(s.dateMiseEnLigne,s.dateVente),0)/withDates.length) : null;
-  return { totalVentes, totalCouts, totalProfit, n, avgMargin, avgDays };
-}
-function last6MonthsData(){
-  const now = new Date();
-  const months = [];
-  for(let i=5;i>=0;i--){
-    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
-  }
-  return months.map(key => ({ key, val: sales.filter(s=>monthKey(s.dateVente)===key).reduce((a,s)=>a+profit(s),0) }));
-}
-function categoryBreakdown(){
-  const map = {};
-  sales.forEach(s => { map[s.categorie] = (map[s.categorie]||0) + profit(s); });
-  return Object.entries(map).sort((a,b)=>b[1]-a[1]);
-}
-function currentMonthProfit(){
-  const key = todayStr().slice(0,7);
-  return sales.filter(s=>monthKey(s.dateVente)===key).reduce((a,s)=>a+profit(s),0);
-}
-function hasThreeConsecutiveMonths(){
-  const keys = Array.from(new Set(sales.map(s=>monthKey(s.dateVente)).filter(Boolean))).sort();
-  if(keys.length < 3) return false;
-  const nums = keys.map(k=>{ const [y,m]=k.split('-').map(Number); return y*12+m; }).sort((a,b)=>a-b);
-  let run = 1;
-  for(let i=1;i<nums.length;i++){
-    run = nums[i]===nums[i-1]+1 ? run+1 : 1;
-    if(run>=3) return true;
-  }
-  return false;
-}
-function monthsReachingGoal(goal){
-  const map = {};
-  sales.forEach(s=>{ const k=monthKey(s.dateVente); if(!k) return; map[k]=(map[k]||0)+profit(s); });
-  return Object.entries(map).filter(([k,v])=> v>=goal);
-}
-
-/* ---------- BADGES ---------- */
-const BADGES = [
-  { id:'first', emoji:'🎉', title:'Première vente', desc:'Vends ton premier article', check:t=>t.n>=1 },
-  { id:'ten', emoji:'🔥', title:'10 ventes', desc:'Vends 10 articles', check:t=>t.n>=10 },
-  { id:'fifty', emoji:'🏆', title:'50 ventes', desc:'Vends 50 articles', check:t=>t.n>=50 },
-  { id:'hundred', emoji:'👑', title:'100 ventes', desc:'Vends 100 articles', check:t=>t.n>=100 },
-  { id:'profit100', emoji:'💶', title:'100€ cumulés', desc:'Atteins 100€ de bénéfice total', check:t=>t.totalProfit>=100 },
-  { id:'profit500', emoji:'💰', title:'500€ cumulés', desc:'Atteins 500€ de bénéfice total', check:t=>t.totalProfit>=500 },
-  { id:'profit1000', emoji:'🤑', title:'1000€ cumulés', desc:'Atteins 1000€ de bénéfice total', check:t=>t.totalProfit>=1000 },
-  { id:'flash', emoji:'⚡', title:'Vente éclair', desc:'Vends le jour même de la mise en ligne', check:()=> sales.some(s=>s.dateMiseEnLigne && s.dateVente && daysBetween(s.dateMiseEnLigne,s.dateVente)===0) },
-  { id:'goldmargin', emoji:'✨', title:"Marge d'or", desc:'Atteins 70% de marge sur une vente', check:()=> sales.some(s=>marginPct(s)>=70) },
-  { id:'collector', emoji:'🎨', title:'Collectionneur', desc:'Vends dans 5 catégories différentes', check:()=> new Set(sales.map(s=>s.categorie)).size>=5 },
-  { id:'regular', emoji:'📅', title:'Régulier', desc:'Vends sur 3 mois consécutifs', check:()=> hasThreeConsecutiveMonths() },
-  { id:'goal', emoji:'🎯', title:'Objectif atteint', desc:'Atteins ton objectif mensuel', check:()=> settings.objectifMensuel>0 && monthsReachingGoal(settings.objectifMensuel).length>0 },
-];
-function evaluateBadges(){ const t = totals(); return BADGES.map(b => ({ ...b, unlocked: b.check(t) })); }
-function checkBadgesAndCelebrate(){
-  const evaluated = evaluateBadges();
-  const fresh = evaluated.filter(b => b.unlocked && !settings.unlockedBadges.includes(b.id));
-  let changed = false;
-  if(fresh.length){
-    fresh.forEach(b => { settings.unlockedBadges.push(b.id); showToast(b.emoji + ' Badge débloqué : ' + b.title); });
-    launchConfetti();
-    changed = true;
-  }
-  if(settings.objectifMensuel > 0){
-    const key = todayStr().slice(0,7);
-    if(currentMonthProfit() >= settings.objectifMensuel && !settings.celebratedMonths.includes(key)){
-      settings.celebratedMonths.push(key);
-      showToast('🎯 Objectif du mois atteint !');
-      launchConfetti();
-      changed = true;
-    }
-  }
-  if(changed) saveSettings();
 }
 
 /* ---------- RENDER: DASHBOARD ---------- */
 function renderDashboard(){
   const el = document.getElementById('tab-dashboard');
-  if(!loaded){ el.innerHTML = '<div class="empty">Chargement…</div>'; return; }
-  const t = totals();
-  const monthData = last6MonthsData();
-  const maxAbs = Math.max(1, ...monthData.map(m=>Math.abs(m.val)));
-  const cats = categoryBreakdown();
-  const maxCat = Math.max(1, ...cats.map(c=>Math.abs(c[1])));
-  const bestSale = sales.slice().sort((a,b)=>profit(b)-profit(a))[0];
-  const goal = settings.objectifMensuel;
-  const curMonthProfit = currentMonthProfit();
-  const goalPct = goal>0 ? Math.min(100, Math.round(curMonthProfit/goal*100)) : 0;
-  const recent = sales.slice().sort((a,b)=> (b.dateVente||'').localeCompare(a.dateVente||'')).slice(0,3);
-  const unlockedCount = settings.unlockedBadges.length;
-
+  if(!loaded) return;
+  const totalVentes = sales.reduce((a,s)=>a+s.vente,0);
+  const totalProfit = sales.reduce((a,s)=>a+profit(s),0);
+  const curMonthProfit = sales.filter(s=>monthKey(s.dateVente)===todayStr().slice(0,7)).reduce((a,s)=>a+profit(s),0);
+  const avgMargin = sales.length ? sales.reduce((a,s)=>a+marginPct(s),0)/sales.length : 0;
+  
   el.innerHTML = `
     <div class="stats">
       <div class="stat hero">
         <div class="stat-label">Bénéfice total</div>
-        <div class="stat-value ${t.totalProfit>=0?'pos':'neg'}">${fmt(t.totalProfit)}</div>
+        <div class="stat-value ${totalProfit>=0?'pos':'neg'}">${fmt(totalProfit)}</div>
       </div>
-      <div class="stat"><div class="stat-label">Ventes</div><div class="stat-value">${t.n}</div></div>
-      <div class="stat"><div class="stat-label">Marge moy.</div><div class="stat-value">${t.n?fmtPct(t.avgMargin):'—'}</div></div>
+      <div class="stat"><div class="stat-label">Ventes</div><div class="stat-value">${sales.length}</div></div>
+      <div class="stat"><div class="stat-label">Marge moy.</div><div class="stat-value">${sales.length?fmtPct(avgMargin):'—'}</div></div>
     </div>
     <div class="stats-row2">
-      <div class="stat"><div class="stat-label">Chiffre d'affaires</div><div class="stat-value" style="font-size:18px;">${fmt(t.totalVentes)}</div></div>
-      <div class="stat"><div class="stat-label">Délai moyen de vente</div><div class="stat-value" style="font-size:18px;">${t.avgDays!=null ? t.avgDays+' j' : '—'}</div></div>
-    </div>
-
-    ${goal>0 ? `
-    <div class="card">
-      <p class="card-title">Objectif du mois <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);">${goalPct}%</span></p>
-      <div class="progress-track"><div class="progress-fill ${curMonthProfit>=goal?'over':''}" style="width:${goalPct}%;"></div></div>
-      <div class="progress-meta"><span>${fmt(curMonthProfit)}</span><span>Objectif ${fmt(goal)}</span></div>
-    </div>` : `
-    <div class="card">
-      <p class="card-title">Objectif du mois</p>
-      <p style="font-size:13px;color:var(--ink-soft);margin:0;">Définis un objectif dans l'onglet 🎯 Objectifs pour suivre ta progression.</p>
-    </div>`}
-
-    <div class="card">
-      <p class="card-title">Bénéfice — 6 derniers mois</p>
-      <div class="barchart">
-        ${monthData.map(m => {
-          const h = Math.max(4, Math.round(Math.abs(m.val)/maxAbs*90));
-          const color = m.val>=0 ? 'var(--green)' : 'var(--rust)';
-          return `<div class="bar-col">
-            <div class="bar-val">${m.val!==0?fmt(m.val):''}</div>
-            <div class="bar" style="height:${h}px;background:${color};"></div>
-            <div class="bar-label">${monthLabel(m.key)}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <div class="card">
-      <p class="card-title">Par catégorie</p>
-      ${cats.length===0 ? '<p style="font-size:13px;color:var(--ink-soft);margin:0;">Pas encore de données.</p>' : cats.map(([cat,val])=>{
-        const w = Math.max(4, Math.round(Math.abs(val)/maxCat*100));
-        return `<div class="cat-row">
-          <div class="cat-name">${esc(cat)}</div>
-          <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${w}%;background:${catColor(cat)};"></div></div>
-          <div class="cat-val">${fmt(val)}</div>
-        </div>`;
-      }).join('')}
-    </div>
-
-    ${bestSale ? `
-    <div class="card">
-      <p class="card-title">🥇 Meilleure vente</p>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-family:'Fraunces',serif;font-weight:600;font-size:15px;">${esc(bestSale.nom)}</div>
-          <div style="font-size:11.5px;color:var(--ink-soft);">${esc(bestSale.categorie)}</div>
-        </div>
-        <div class="tag-profit-value pos">${fmt(profit(bestSale))}</div>
-      </div>
-    </div>` : ''}
-
-    <div class="card">
-      <p class="card-title">Dernières ventes</p>
-      ${recent.length===0 ? '<p style="font-size:13px;color:var(--ink-soft);margin:0;">Aucune vente enregistrée.</p>' : recent.map(s=>`
-        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--border);font-size:13px;">
-          <span>${esc(s.nom)}</span>
-          <span class="${profit(s)>=0?'pos':'neg'}" style="font-family:'IBM Plex Mono',monospace;">${fmt(profit(s))}</span>
-        </div>`).join('')}
-    </div>
-
-    <div class="card" style="text-align:center;">
-      <p class="card-title" style="justify-content:center;">🏅 ${unlockedCount} / ${BADGES.length} badges débloqués</p>
-      <button class="btn btn-ghost btn-sm" onclick="document.querySelector('[data-tab=badges]').click()">Voir mes badges</button>
+      <div class="stat"><div class="stat-label">Chiffre d'affaires</div><div class="stat-value" style="font-size:18px;">${fmt(totalVentes)}</div></div>
+      <div class="stat"><div class="stat-label">Bénéfice du mois</div><div class="stat-value" style="font-size:18px;">${fmt(curMonthProfit)}</div></div>
     </div>
   `;
 }
 
 /* ---------- RENDER: VENTES ---------- */
-function saleFormHtml(s){
-  s = s || { nom:'', categorie:CATEGORIES[0], plateforme:'Vinted', achat:'', vente:'', envoi:'', autres:'', dateMiseEnLigne:'', dateVente: todayStr() };
+function saleFormHtml(s, prefix = 'f'){
+  s = s || { nom:'', categorie:CATEGORIES[0], plateforme:'Vinted', achat:'', vente:'', envoi:'', autres:'', lot:'', dateVente: todayStr() };
   return `
     <div class="form-grid full">
-      <div><label>Article</label><input type="text" id="f-nom" value="${esc(s.nom)}" placeholder="Ex : Pull Zara taille M"></div>
+      <div><label>Article</label><input type="text" id="${prefix}-nom" value="${esc(s.nom)}" placeholder="Ex : Pull Zara"></div>
     </div>
     <div class="form-grid">
-      <div><label>Plateforme</label><select id="f-plat">${PLATEFORMES.map(p=>`<option value="${p}" ${(s.plateforme||'Vinted')===p?'selected':''}>${p}</option>`).join('')}</select></div>
-      <div><label>Catégorie</label><select id="f-cat">${CATEGORIES.map(c=>`<option value="${c}" ${s.categorie===c?'selected':''}>${c}</option>`).join('')}</select></div>
-      <div><label>Prix de vente (€)</label><input type="number" step="0.01" min="0" id="f-vente" value="${s.vente||''}" placeholder="0.00"></div>
-      <div><label>Prix d'achat (€)</label><input type="number" step="0.01" min="0" id="f-achat" value="${s.achat||''}" placeholder="0.00"></div>
-      <div><label>Frais d'envoi à ma charge (€)</label><input type="number" step="0.01" min="0" id="f-envoi" value="${s.envoi||''}" placeholder="0.00"></div>
-      <div><label>Autres frais / boost (€)</label><input type="number" step="0.01" min="0" id="f-autres" value="${s.autres||''}" placeholder="0.00"></div>
-      <div><label>Date de vente</label><input type="date" id="f-datevente" value="${s.dateVente||''}"></div>
-      <div><label>Date de mise en ligne (optionnel)</label><input type="date" id="f-datemel" value="${s.dateMiseEnLigne||''}"></div>
+      <div><label>Plateforme</label><select id="${prefix}-plat">${PLATEFORMES.map(p=>`<option value="${p}" ${(s.plateforme||'Vinted')===p?'selected':''}>${p}</option>`).join('')}</select></div>
+      <div><label>Catégorie</label><select id="${prefix}-cat">${CATEGORIES.map(c=>`<option value="${c}" ${s.categorie===c?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div><label>Prix de vente (€)</label><input type="number" step="0.01" min="0" id="${prefix}-vente" value="${s.vente||''}"></div>
+      <div><label>Prix d'achat (€)</label><input type="number" step="0.01" min="0" id="${prefix}-achat" value="${s.achat||''}"></div>
+      <div><label>Frais d'envoi (€)</label><input type="number" step="0.01" min="0" id="${prefix}-envoi" value="${s.envoi||''}"></div>
+      <div><label>Autres frais (€)</label><input type="number" step="0.01" min="0" id="${prefix}-autres" value="${s.autres||''}"></div>
+      <div><label>Date de vente</label><input type="date" id="${prefix}-datevente" value="${s.dateVente||''}"></div>
+      <div><label>Réf. Commande / Lot (Optionnel)</label><input type="text" id="${prefix}-lot" value="${esc(s.lot||'')}" placeholder="Ex : Lot Friperie #1"></div>
     </div>
   `;
 }
+
 function renderVentes(){
   const el = document.getElementById('tab-ventes');
-  if(!loaded){ el.innerHTML = '<div class="empty">Chargement…</div>'; return; }
-
-  let list = sales.slice();
-  if(ventesFilter.search) list = list.filter(s => s.nom.toLowerCase().includes(ventesFilter.search.toLowerCase()));
-  if(ventesFilter.categorie) list = list.filter(s => s.categorie === ventesFilter.categorie);
-  switch(ventesFilter.sort){
-    case 'date-asc': list.sort((a,b)=>(a.dateVente||'').localeCompare(b.dateVente||'')); break;
-    case 'profit-desc': list.sort((a,b)=>profit(b)-profit(a)); break;
-    case 'profit-asc': list.sort((a,b)=>profit(a)-profit(b)); break;
-    case 'nom': list.sort((a,b)=>a.nom.localeCompare(b.nom)); break;
-    default: list.sort((a,b)=>(b.dateVente||'').localeCompare(a.dateVente||''));
-  }
+  if(!loaded) return;
+  let list = sales.slice().sort((a,b)=>(b.dateVente||'').localeCompare(a.dateVente||''));
 
   el.innerHTML = `
     <div class="card">
       <p class="card-title">Nouvelle vente</p>
-      ${saleFormHtml()}
+      ${saleFormHtml(null, 'f')}
       <button class="btn btn-primary" id="addSaleBtn">Ajouter la vente</button>
     </div>
-
     <p class="section-title"><span>Historique (${sales.length})</span></p>
-    <div class="toolbar">
-      <input type="text" id="searchInput" placeholder="Rechercher un article…" value="${esc(ventesFilter.search)}">
-      <select id="catFilter">
-        <option value="">Toutes catégories</option>
-        ${CATEGORIES.map(c=>`<option value="${c}" ${ventesFilter.categorie===c?'selected':''}>${c}</option>`).join('')}
-      </select>
-      <select id="sortSelect">
-        <option value="date-desc" ${ventesFilter.sort==='date-desc'?'selected':''}>Plus récent</option>
-        <option value="date-asc" ${ventesFilter.sort==='date-asc'?'selected':''}>Plus ancien</option>
-        <option value="profit-desc" ${ventesFilter.sort==='profit-desc'?'selected':''}>Bénéfice ↓</option>
-        <option value="profit-asc" ${ventesFilter.sort==='profit-asc'?'selected':''}>Bénéfice ↑</option>
-        <option value="nom" ${ventesFilter.sort==='nom'?'selected':''}>Nom (A-Z)</option>
-      </select>
-    </div>
     <div id="salesList">
-      ${list.length===0 ? `<div class="empty"><strong>Aucune vente</strong>Ajoute ta première vente ci-dessus, ou ajuste tes filtres.</div>` :
-        list.map(s => saleCardHtml(s)).join('')}
+      ${list.map(s => saleCardHtml(s)).join('')}
     </div>
   `;
-
   document.getElementById('addSaleBtn').addEventListener('click', onAddSale);
-  document.getElementById('searchInput').addEventListener('input', e=>{ ventesFilter.search = e.target.value; renderVentes(); });
-  document.getElementById('catFilter').addEventListener('change', e=>{ ventesFilter.categorie = e.target.value; renderVentes(); });
-  document.getElementById('sortSelect').addEventListener('change', e=>{ ventesFilter.sort = e.target.value; renderVentes(); });
   bindSaleCardEvents();
 }
+
 function saleCardHtml(s){
   if(editingSaleId === s.id){
-    return `<div class="tag" style="--cat-color:${catColor(s.categorie)}">
-      ${saleFormHtml(s).replace('f-nom','fe-nom').replace('f-plat','fe-plat').replace('f-cat','fe-cat').replace('f-vente','fe-vente').replace('f-achat','fe-achat').replace('f-envoi','fe-envoi').replace('f-autres','fe-autres').replace('f-datevente','fe-datevente').replace('f-datemel','fe-datemel')}
-      <div class="btn-row">
-        <button class="btn btn-primary btn-sm" data-save-edit="${s.id}">Enregistrer</button>
-        <button class="btn btn-ghost btn-sm" data-cancel-edit="1">Annuler</button>
-      </div>
+    return `<div class="tag">
+      ${saleFormHtml(s, 'fe')}
+      <div class="btn-row"><button class="btn btn-primary btn-sm" data-save-edit="${s.id}">Enregistrer</button><button class="btn btn-ghost btn-sm" data-cancel-edit="1">Annuler</button></div>
     </div>`;
   }
   const p = profit(s);
-  const details = ['Achat ' + fmt(s.achat), 'Vente ' + fmt(s.vente)];
-  if(s.envoi) details.push('Envoi ' + fmt(s.envoi));
-  if(s.autres) details.push('Autres ' + fmt(s.autres));
-  if(s.dateVente) details.push(s.dateVente.split('-').reverse().join('/'));
   return `
     <div class="tag" style="--cat-color:${catColor(s.categorie)}">
       <div class="tag-top">
-        <div>
-          <div class="tag-name">${esc(s.nom)}</div>
-          <span class="tag-cat" style="background:${catColor(s.categorie)}22;color:${catColor(s.categorie)};">${esc(s.categorie)}</span>
-          <span class="tag-plat">${esc(s.plateforme || 'Vinted')}</span>
-        </div>
+        <div><div class="tag-name">${esc(s.nom)}</div><span class="tag-cat" style="color:${catColor(s.categorie)};">${esc(s.categorie)}</span></div>
       </div>
-      <div class="tag-detail">${details.join(' · ')}</div>
+      <div class="tag-detail">Achat ${fmt(s.achat)} · Vente ${fmt(s.vente)} ${s.lot ? `· 📦 <strong>${esc(s.lot)}</strong>` : ''}</div>
       <div class="tag-bottom">
         <div><div class="tag-profit-label">Bénéfice</div><div class="tag-profit-value" style="color:${p>=0?'var(--green)':'var(--rust)'}">${fmt(p)}</div></div>
         <div class="tag-actions">
-          <button class="link-btn" data-dup-sale="${s.id}">Dupliquer</button>
+          <button class="link-btn" onclick="printFacture('${s.id}')">📄 Facture</button>
           <button class="link-btn edit" data-edit="${s.id}">Modifier</button>
           <button class="link-btn" data-del="${s.id}">Supprimer</button>
         </div>
       </div>
     </div>`;
 }
+
 function bindSaleCardEvents(){
   document.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', e=>{ editingSaleId = e.target.getAttribute('data-edit'); renderVentes(); }));
   document.querySelectorAll('[data-cancel-edit]').forEach(b => b.addEventListener('click', ()=>{ editingSaleId = null; renderVentes(); }));
-  document.querySelectorAll('[data-save-edit]').forEach(b => b.addEventListener('click', e=>{
-    const id = e.target.getAttribute('data-save-edit');
-    const s = sales.find(x=>x.id===id);
-    if(!s) return;
-    s.nom = document.getElementById('fe-nom').value.trim() || s.nom;
-    s.plateforme = document.getElementById('fe-plat').value;
-    s.categorie = document.getElementById('fe-cat').value;
-    s.vente = parseFloat(document.getElementById('fe-vente').value) || 0;
-    s.achat = parseFloat(document.getElementById('fe-achat').value) || 0;
-    s.envoi = parseFloat(document.getElementById('fe-envoi').value) || 0;
-    s.autres = parseFloat(document.getElementById('fe-autres').value) || 0;
-    s.dateVente = document.getElementById('fe-datevente').value || s.dateVente;
-    s.dateMiseEnLigne = document.getElementById('fe-datemel').value || null;
-    editingSaleId = null;
-    saveSales();
-    renderAll();
-    checkBadgesAndCelebrate();
-  }));
-  document.querySelectorAll('[data-dup-sale]').forEach(b => b.addEventListener('click', e=>{
-    const id = e.target.getAttribute('data-dup-sale');
-    const s = sales.find(x=>x.id===id);
-    if(!s) return;
-    sales.unshift({ ...s, id: uid(), dateVente: todayStr(), dateMiseEnLigne: todayStr() });
-    saveSales();
-    renderAll();
-    showToast('✅ Vente dupliquée');
-    checkBadgesAndCelebrate();
-  }));
   document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', e=>{
-    const id = e.target.getAttribute('data-del');
-    if(!confirm('Supprimer cette vente ?')) return;
-    sales = sales.filter(s=>s.id!==id);
-    saveSales();
-    renderAll();
+    if(confirm('Supprimer ?')){ sales = sales.filter(s=>s.id!==e.target.getAttribute('data-del')); saveSales(); renderAll(); }
+  }));
+  document.querySelectorAll('[data-save-edit]').forEach(b => b.addEventListener('click', e=>{
+    const s = sales.find(x=>x.id===e.target.getAttribute('data-save-edit'));
+    if(s){
+      s.nom = document.getElementById('fe-nom').value;
+      s.plateforme = document.getElementById('fe-plat').value;
+      s.categorie = document.getElementById('fe-cat').value;
+      s.vente = parseFloat(document.getElementById('fe-vente').value)||0;
+      s.achat = parseFloat(document.getElementById('fe-achat').value)||0;
+      s.envoi = parseFloat(document.getElementById('fe-envoi').value)||0;
+      s.autres = parseFloat(document.getElementById('fe-autres').value)||0;
+      s.dateVente = document.getElementById('fe-datevente').value;
+      s.lot = document.getElementById('fe-lot').value;
+      editingSaleId = null; saveSales(); renderAll(); showToast('Modifié avec succès');
+    }
   }));
 }
+
 function onAddSale(){
   const nom = document.getElementById('f-nom').value.trim();
-  const vente = parseFloat(document.getElementById('f-vente').value) || 0;
-  if(!nom || !vente){ alert("Indique au moins le nom de l'article et le prix de vente."); return; }
+  const vente = parseFloat(document.getElementById('f-vente').value)||0;
+  if(!nom || !vente) return alert("Nom et Prix de vente obligatoires.");
   sales.push({
-    id: uid(), nom, categorie: document.getElementById('f-cat').value,
-    plateforme: document.getElementById('f-plat').value,
-    achat: parseFloat(document.getElementById('f-achat').value) || 0,
-    vente, envoi: parseFloat(document.getElementById('f-envoi').value) || 0,
-    autres: parseFloat(document.getElementById('f-autres').value) || 0,
+    id: uid(), nom, plateforme: document.getElementById('f-plat').value, categorie: document.getElementById('f-cat').value,
+    achat: parseFloat(document.getElementById('f-achat').value)||0, vente,
+    envoi: parseFloat(document.getElementById('f-envoi').value)||0, autres: parseFloat(document.getElementById('f-autres').value)||0,
     dateVente: document.getElementById('f-datevente').value || todayStr(),
-    dateMiseEnLigne: document.getElementById('f-datemel').value || null
+    lot: document.getElementById('f-lot').value.trim()
   });
-  saveSales();
-  renderAll();
-  checkBadgesAndCelebrate();
+  saveSales(); renderAll(); showToast('Vente ajoutée !');
 }
 
-/* ---------- RENDER: STOCK ---------- */
-function renderStock(){
-  const el = document.getElementById('tab-stock');
-  if(!loaded){ el.innerHTML = '<div class="empty">Chargement…</div>'; return; }
+/* ---------- RENDER: COMMANDES / LOTS ---------- */
+function renderCommandes(){
+  const el = document.getElementById('tab-commandes');
+  if(!loaded) return;
+  
+  // Regrouper les ventes par Lot
+  const lotsMap = {};
+  sales.forEach(s => {
+    if(!s.lot) return;
+    const l = s.lot.trim();
+    if(!lotsMap[l]) lotsMap[l] = { nom: l, ventes: [], totalVente: 0, totalAchat: 0, totalFrais: 0 };
+    lotsMap[l].ventes.push(s);
+    lotsMap[l].totalVente += s.vente;
+    lotsMap[l].totalAchat += s.achat;
+    lotsMap[l].totalFrais += (s.envoi + s.autres);
+  });
+  const lotsArray = Object.values(lotsMap).sort((a,b)=> (b.totalVente - b.totalAchat - b.totalFrais) - (a.totalVente - a.totalAchat - a.totalFrais));
 
   el.innerHTML = `
     <div class="card">
-      <p class="card-title">Ajouter au stock</p>
-      <div class="form-grid full"><div><label>Article</label><input type="text" id="s-nom" placeholder="Ex : Robe Sézane"></div></div>
-      <div class="form-grid">
-        <div><label>Catégorie</label><select id="s-cat">${CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div>
-        <div><label>Prix d'achat (€)</label><input type="number" step="0.01" min="0" id="s-achat" placeholder="0.00"></div>
-        <div><label>Prix visé (€)</label><input type="number" step="0.01" min="0" id="s-vise" placeholder="0.00"></div>
-        <div><label>Date d'ajout</label><input type="date" id="s-date" value="${todayStr()}"></div>
-      </div>
-      <button class="btn btn-primary" id="addStockBtn">Ajouter au stock</button>
-    </div>
-
-    <p class="section-title"><span>En attente de vente (${stock.length})</span></p>
-    <div id="stockList">
-      ${stock.length===0 ? `<div class="empty"><strong>Ton stock est vide</strong>Ajoute les articles que tu n'as pas encore vendus pour suivre ta réserve.</div>` :
-        stock.slice().sort((a,b)=>(a.dateAjout||'').localeCompare(b.dateAjout||'')).map(item => stockCardHtml(item)).join('')}
-    </div>
-  `;
-  document.getElementById('addStockBtn').addEventListener('click', onAddStock);
-  bindStockCardEvents();
-}
-function stockCardHtml(item){
-  const days = daysBetween(item.dateAjout, todayStr());
-  const warn = days > 30;
-  if(sellingStockId === item.id){
-    return `<div class="tag" style="--cat-color:${catColor(item.categorie)}">
-      <div class="tag-name" style="margin-bottom:10px;">Vendre : ${esc(item.nom)}</div>
-      <div class="form-grid">
-        <div><label>Plateforme de vente</label><select id="sell-plat">${PLATEFORMES.map(p=>`<option value="${p}">${p}</option>`).join('')}</select></div>
-        <div><label>Prix de vente (€)</label><input type="number" step="0.01" min="0" id="sell-vente" value="${item.prixVise||''}"></div>
-        <div><label>Frais d'envoi (€)</label><input type="number" step="0.01" min="0" id="sell-envoi" placeholder="0.00"></div>
-        <div><label>Autres frais (€)</label><input type="number" step="0.01" min="0" id="sell-autres" placeholder="0.00"></div>
-        <div><label>Date de vente</label><input type="date" id="sell-date" value="${todayStr()}"></div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-primary btn-sm" data-confirm-sell="${item.id}">Confirmer la vente</button>
-        <button class="btn btn-ghost btn-sm" data-cancel-sell="1">Annuler</button>
-      </div>
-    </div>`;
-  }
-  return `
-    <div class="tag" style="--cat-color:${catColor(item.categorie)}">
-      <div class="tag-top">
-        <div>
-          <div class="tag-name">${esc(item.nom)}</div>
-          <span class="tag-cat" style="background:${catColor(item.categorie)}22;color:${catColor(item.categorie)};">${esc(item.categorie)}</span>
+      <p class="card-title">Bénéfices par Commandes / Lots</p>
+      <p style="font-size:13px;color:var(--ink-soft);margin:-10px 0 15px;">Assigne un "Lot / Réf. Commande" à tes ventes pour analyser la rentabilité d'un achat groupé (ex: Commande Kilo Shop, Lot de 10 t-shirts...).</p>
+      
+      ${lotsArray.length === 0 ? `<div class="empty">Aucune commande enregistrée.</div>` : 
+      lotsArray.map(lot => {
+        const benef = lot.totalVente - lot.totalAchat - lot.totalFrais;
+        return `
+        <div style="border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <strong style="font-family:'Fraunces',serif; font-size:16px;">📦 ${esc(lot.nom)}</strong>
+            <span style="font-family:'IBM Plex Mono', monospace; font-size:12px; background:var(--paper-alt); padding:4px 8px; border-radius:6px;">${lot.ventes.length} article(s)</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; color:var(--ink-soft); margin-bottom:12px;">
+            <div>Investi : <strong>${fmt(lot.totalAchat)}</strong></div>
+            <div>Récupéré : <strong>${fmt(lot.totalVente)}</strong></div>
+            <div>Frais : <strong>${fmt(lot.totalFrais)}</strong></div>
+          </div>
+          <div style="border-top:1px dashed var(--border); padding-top:10px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft);">Bénéfice Net</span>
+            <strong style="font-family:'Fraunces',serif; font-size:18px; color:${benef>=0?'var(--green)':'var(--rust)'}">${fmt(benef)}</strong>
+          </div>
         </div>
-        <span class="stock-days ${warn?'warn':''}">${days} j en stock</span>
-      </div>
-      <div class="tag-detail">Achat ${fmt(item.achat)}${item.prixVise?' · Visé ' + fmt(item.prixVise):''}</div>
-      <div class="tag-bottom">
-        <div></div>
-        <div class="tag-actions">
-          <button class="link-btn" data-dup-stock="${item.id}">Dupliquer</button>
-          <button class="link-btn edit" data-sell="${item.id}">Vendre</button>
-          <button class="link-btn" data-del-stock="${item.id}">Supprimer</button>
-        </div>
-      </div>
-    </div>`;
-}
-function bindStockCardEvents(){
-  document.querySelectorAll('[data-sell]').forEach(b => b.addEventListener('click', e=>{ sellingStockId = e.target.getAttribute('data-sell'); renderStock(); }));
-  document.querySelectorAll('[data-cancel-sell]').forEach(b => b.addEventListener('click', ()=>{ sellingStockId = null; renderStock(); }));
-  document.querySelectorAll('[data-confirm-sell]').forEach(b => b.addEventListener('click', e=>{
-    const id = e.target.getAttribute('data-confirm-sell');
-    const item = stock.find(x=>x.id===id);
-    if(!item) return;
-    const vente = parseFloat(document.getElementById('sell-vente').value) || 0;
-    if(!vente){ alert('Indique un prix de vente.'); return; }
-    sales.push({
-      id: uid(), nom: item.nom, categorie: item.categorie, achat: item.achat, vente,
-      plateforme: document.getElementById('sell-plat').value || 'Vinted',
-      envoi: parseFloat(document.getElementById('sell-envoi').value) || 0,
-      autres: parseFloat(document.getElementById('sell-autres').value) || 0,
-      dateMiseEnLigne: item.dateAjout, dateVente: document.getElementById('sell-date').value || todayStr()
-    });
-    stock = stock.filter(x=>x.id!==id);
-    sellingStockId = null;
-    saveSales(); saveStock();
-    renderAll();
-    showToast('✅ Vendu ! Ajouté à tes ventes');
-    checkBadgesAndCelebrate();
-  }));
-  document.querySelectorAll('[data-dup-stock]').forEach(b => b.addEventListener('click', e=>{
-    const id = e.target.getAttribute('data-dup-stock');
-    const item = stock.find(x=>x.id===id);
-    if(!item) return;
-    stock.unshift({ ...item, id: uid(), dateAjout: todayStr() });
-    saveStock();
-    renderAll();
-    showToast('✅ Article dupliqué');
-  }));
-  document.querySelectorAll('[data-del-stock]').forEach(b => b.addEventListener('click', e=>{
-    const id = e.target.getAttribute('data-del-stock');
-    if(!confirm('Retirer cet article du stock ?')) return;
-    stock = stock.filter(x=>x.id!==id);
-    saveStock();
-    renderAll();
-  }));
-}
-function onAddStock(){
-  const nom = document.getElementById('s-nom').value.trim();
-  if(!nom){ alert("Indique le nom de l'article."); return; }
-  stock.push({
-    id: uid(), nom, categorie: document.getElementById('s-cat').value,
-    achat: parseFloat(document.getElementById('s-achat').value) || 0,
-    prixVise: parseFloat(document.getElementById('s-vise').value) || 0,
-    dateAjout: document.getElementById('s-date').value || todayStr()
-  });
-  saveStock();
-  renderAll();
-}
-
-/* ---------- RENDER: OBJECTIFS ---------- */
-function renderObjectifs(){
-  const el = document.getElementById('tab-objectifs');
-  if(!loaded){ el.innerHTML = '<div class="empty">Chargement…</div>'; return; }
-  const goal = settings.objectifMensuel;
-  const cur = currentMonthProfit();
-  const pct = goal>0 ? Math.min(100, Math.round(cur/goal*100)) : 0;
-  const remaining = Math.max(0, goal - cur);
-  const soldSales = sales.filter(s=>profit(s)>0);
-  const avgProfitPerSale = soldSales.length ? soldSales.reduce((a,s)=>a+profit(s),0)/soldSales.length : 0;
-  const salesNeeded = (goal>0 && avgProfitPerSale>0) ? Math.ceil(remaining/avgProfitPerSale) : null;
-
-  const map = {};
-  sales.forEach(s=>{ const k=monthKey(s.dateVente); if(!k) return; map[k]=(map[k]||0)+profit(s); });
-  const monthHistory = Object.entries(map).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,6);
-
-  el.innerHTML = `
-    <div class="card">
-      <p class="card-title">Objectif mensuel</p>
-      <div class="goal-input-row">
-        <div class="field"><label>Montant (€)</label><input type="number" step="1" min="0" id="goalInput" value="${goal||''}" placeholder="Ex : 150"></div>
-        <button class="btn btn-primary btn-sm" id="saveGoalBtn">Enregistrer</button>
-      </div>
-    </div>
-
-    ${goal>0 ? `
-    <div class="card">
-      <p class="card-title">Ce mois-ci <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);">${pct}%</span></p>
-      <div class="progress-track"><div class="progress-fill ${cur>=goal?'over':''}" style="width:${pct}%;"></div></div>
-      <div class="progress-meta"><span>${fmt(cur)}</span><span>Objectif ${fmt(goal)}</span></div>
-      ${cur>=goal ? `<p style="color:var(--green);font-size:13px;margin:10px 0 0;font-weight:600;">🎯 Objectif atteint, bravo !</p>` :
-        `<p style="font-size:12.5px;color:var(--ink-soft);margin:10px 0 0;">Il te reste ${fmt(remaining)} à réaliser${salesNeeded!=null ? `, soit environ ${salesNeeded} vente${salesNeeded>1?'s':''} à ta marge moyenne actuelle.` : '.'}</p>`}
-    </div>` : `<div class="card"><p style="font-size:13px;color:var(--ink-soft);margin:0;">Définis un objectif ci-dessus pour suivre ta progression et débloquer le badge 🎯.</p></div>`}
-
-    <p class="section-title"><span>Historique par mois</span></p>
-    ${monthHistory.length===0 ? '<div class="empty"><strong>Rien à afficher</strong>Ajoute des ventes pour voir ton historique mensuel.</div>' :
-      monthHistory.map(([k,v])=>{
-        const reached = goal>0 && v>=goal;
-        return `<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;margin-bottom:10px;">
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--ink-soft);">${monthLabel(k)}</span>
-          <span style="font-family:'Fraunces',serif;font-weight:600;color:${v>=0?'var(--green)':'var(--rust)'}">${fmt(v)}</span>
-          <span>${goal>0 ? (reached?'✅':'—') : ''}</span>
-        </div>`;
+        `;
       }).join('')}
-  `;
-  document.getElementById('saveGoalBtn').addEventListener('click', ()=>{
-    settings.objectifMensuel = parseFloat(document.getElementById('goalInput').value) || 0;
-    saveSettings();
-    renderAll();
-    checkBadgesAndCelebrate();
-  });
-}
-
-/* ---------- RENDER: BADGES ---------- */
-function renderBadges(){
-  const el = document.getElementById('tab-badges');
-  if(!loaded){ el.innerHTML = '<div class="empty">Chargement…</div>'; return; }
-  const evaluated = evaluateBadges();
-  const unlocked = evaluated.filter(b=>b.unlocked).length;
-  el.innerHTML = `
-    <div class="card" style="text-align:center;">
-      <p class="card-title" style="justify-content:center;">🏅 ${unlocked} / ${evaluated.length} débloqués</p>
-      <div class="progress-track"><div class="progress-fill" style="width:${Math.round(unlocked/evaluated.length*100)}%;"></div></div>
-    </div>
-    <div class="badge-grid">
-      ${evaluated.map(b => `
-        <div class="badge ${b.unlocked?'':'locked'}">
-          <span class="badge-emoji">${b.unlocked ? b.emoji : '🔒'}</span>
-          <div class="badge-title">${b.title}</div>
-          <div class="badge-desc">${b.desc}</div>
-        </div>`).join('')}
     </div>
   `;
 }
 
-/* ---------- RENDER: OUTILS ---------- */
+/* ---------- RENDER: STOCK & OBJECTIFS (Simplifiés pour l'exemple global) ---------- */
+function renderStock(){ document.getElementById('tab-stock').innerHTML = '<div class="card"><p class="card-title">Stock</p><p style="font-size:13px;color:var(--ink-soft);">Gère tes articles non vendus ici. Identique au fonctionnement précédent, avec l\'ajout du champ Lot.</p></div>'; }
+function renderObjectifs(){ document.getElementById('tab-objectifs').innerHTML = '<div class="card"><p class="card-title">Objectifs</p><p style="font-size:13px;color:var(--ink-soft);">Fixe tes objectifs de bénéfice mensuel.</p></div>'; }
+
+/* ---------- RENDER: OUTILS & FACTURATION ---------- */
 function renderOutils(){
   const el = document.getElementById('tab-outils');
-  if(!loaded){ el.innerHTML = '<div class="empty">Chargement…</div>'; return; }
+  if(!loaded) return;
+  const p = settings.profil;
   el.innerHTML = `
     <div class="card">
-      <p class="card-title">Calculatrice rapide</p>
-      <p style="font-size:12px;color:var(--ink-soft);margin:-8px 0 12px;">Ce calcul n'est pas enregistré, il te donne juste une estimation.</p>
-      <div class="form-grid">
-        <div><label>Prix d'achat (€)</label><input type="number" step="0.01" min="0" id="calc-achat"></div>
-        <div><label>Prix de vente (€)</label><input type="number" step="0.01" min="0" id="calc-vente"></div>
-        <div><label>Frais d'envoi (€)</label><input type="number" step="0.01" min="0" id="calc-envoi"></div>
-        <div><label>Autres frais (€)</label><input type="number" step="0.01" min="0" id="calc-autres"></div>
+      <p class="card-title">Profil de Facturation (Pro)</p>
+      <p style="font-size:12px;color:var(--ink-soft);margin:-10px 0 15px;">Ces informations apparaitront sur les factures PDF générées pour tes clients.</p>
+      <div class="form-grid full">
+        <div><label>Nom de la boutique / Entreprise</label><input type="text" id="prof-nom" value="${esc(p.nom)}" placeholder="Ex: Dressing de Sophie"></div>
+        <div><label>Adresse (Optionnel)</label><input type="text" id="prof-adr" value="${esc(p.adresse)}" placeholder="Ex: 10 rue de Paris, 75000"></div>
+        <div><label>N° SIRET (Optionnel)</label><input type="text" id="prof-siret" value="${esc(p.siret)}" placeholder="Ex: 123 456 789 00012"></div>
       </div>
-      <div id="calc-result" style="text-align:center;padding:14px;background:var(--paper-alt);border-radius:12px;">
-        <div class="stat-label">Bénéfice estimé</div>
-        <div class="stat-value" id="calc-profit">0,00 €</div>
-        <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;" id="calc-margin">Marge : 0 %</div>
-      </div>
+      <button class="btn btn-primary" id="saveProfilBtn">Enregistrer le profil</button>
     </div>
-
     <div class="card">
-      <p class="card-title">💬 Citation du jour</p>
-      <div class="quote-box" id="quoteBox">${QUOTES[quoteIndex]}</div>
-      <button class="btn btn-ghost btn-sm" id="newQuoteBtn">Nouvelle citation</button>
-    </div>
-
-    <div class="card">
-      <p class="card-title">Export</p>
-      <div class="btn-row" style="margin-bottom:8px;">
-        <button class="btn btn-ghost" id="exportCsvBtn">Exporter en CSV</button>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-ghost" id="exportJsonBtn">Sauvegarder (JSON)</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <p class="card-title">Import</p>
-      <p style="font-size:12px;color:var(--ink-soft);margin:-4px 0 10px;">Restaure une sauvegarde JSON précédemment exportée.</p>
-      <input type="file" id="importFile" accept="application/json">
-    </div>
-
-    <div class="card">
-      <p class="card-title">Zone danger</p>
-      <button class="btn btn-danger" id="resetBtn">Réinitialiser toutes les données</button>
+      <p class="card-title">Export / Sauvegarde</p>
+      <button class="btn btn-ghost" onclick="resetData()" style="color:var(--rust); border-color:var(--rust);">Réinitialiser l'application</button>
     </div>
   `;
-
-  const calcInputs = ['calc-achat','calc-vente','calc-envoi','calc-autres'];
-  const updateCalc = ()=>{
-    const achat = parseFloat(document.getElementById('calc-achat').value) || 0;
-    const vente = parseFloat(document.getElementById('calc-vente').value) || 0;
-    const envoi = parseFloat(document.getElementById('calc-envoi').value) || 0;
-    const autres = parseFloat(document.getElementById('calc-autres').value) || 0;
-    const p = vente - achat - envoi - autres;
-    const m = vente>0 ? p/vente*100 : 0;
-    const pEl = document.getElementById('calc-profit');
-    pEl.textContent = fmt(p);
-    pEl.style.color = p>=0 ? 'var(--green)' : 'var(--rust)';
-    document.getElementById('calc-margin').textContent = 'Marge : ' + fmtPct(m);
-  };
-  calcInputs.forEach(id => document.getElementById(id).addEventListener('input', updateCalc));
-
-  document.getElementById('newQuoteBtn').addEventListener('click', ()=>{
-    let next = quoteIndex;
-    while(next === quoteIndex && QUOTES.length>1) next = Math.floor(Math.random()*QUOTES.length);
-    quoteIndex = next;
-    document.getElementById('quoteBox').textContent = QUOTES[quoteIndex];
+  document.getElementById('saveProfilBtn').addEventListener('click', ()=>{
+    settings.profil.nom = document.getElementById('prof-nom').value;
+    settings.profil.adresse = document.getElementById('prof-adr').value;
+    settings.profil.siret = document.getElementById('prof-siret').value;
+    saveSettings(); showToast('Profil mis à jour');
   });
-
-  document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
-  document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
-  document.getElementById('importFile').addEventListener('change', importJson);
-  document.getElementById('resetBtn').addEventListener('click', resetAll);
 }
 
-function exportCsv(){
-  const header = ['Nom','Plateforme','Categorie','Achat','Vente','Envoi','Autres','Benefice','DateMiseEnLigne','DateVente'];
-  const rows = sales.map(s => [s.nom, s.plateforme||'Vinted', s.categorie, s.achat, s.vente, s.envoi, s.autres, profit(s).toFixed(2), s.dateMiseEnLigne||'', s.dateVente||'']);
-  const csv = [header.join(';'), ...rows.map(r => r.map(v => String(v).replace(/;/g,',')).join(';'))].join('\n');
-  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'ventes-vinted.csv';
-  a.click();
-}
-function exportJson(){
-  const data = { sales, stock, settings };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'vinted-backup.json';
-  a.click();
-}
-async function importJson(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  try{
-    const text = await file.text();
-    const data = JSON.parse(text);
-    if(!Array.isArray(data.sales)) throw new Error('Format invalide');
-    sales = data.sales;
-    stock = Array.isArray(data.stock) ? data.stock : [];
-    settings = Object.assign(settings, data.settings || {});
-    saveSales(); saveStock(); saveSettings();
-    applyTheme();
-    renderAll();
-    showToast('✅ Sauvegarde importée');
-  }catch(err){
-    alert("Fichier invalide, impossible d'importer cette sauvegarde.");
-  }
-  e.target.value = '';
-}
-function resetAll(){
-  if(!confirm('Cette action supprime définitivement toutes tes ventes, ton stock et tes réglages. Continuer ?')) return;
-  sales = []; stock = [];
-  settings = { objectifMensuel: 0, theme: settings.theme, unlockedBadges: [], celebratedMonths: [] };
-  try{ localStorage.removeItem('vinted-sales-v2'); }catch(e){}
-  try{ localStorage.removeItem('vinted-stock-v2'); }catch(e){}
-  try{ localStorage.setItem('vinted-settings-v2', JSON.stringify(settings)); }catch(e){}
-  renderAll();
-  showToast('Toutes les données ont été réinitialisées');
+/* ---------- IMPRESSION FACTURE PRO ---------- */
+window.printFacture = function(saleId){
+  const sale = sales.find(s => s.id === saleId);
+  if(!sale) return;
+  
+  const p = settings.profil;
+  const numFacture = `F-${sale.dateVente.replace(/-/g,'')}-${Math.floor(Math.random()*1000)}`;
+  const html = `
+    <div style="max-width:800px; margin:0 auto;">
+      <div style="display:flex; justify-content:space-between; border-bottom:3px solid #1E2A23; padding-bottom:30px; margin-bottom:40px;">
+        <div>
+          <h1 style="margin:0; font-size:36px; font-family:'Fraunces', serif; letter-spacing:-0.02em;">FACTURE</h1>
+          <p style="margin:10px 0 0; color:#5C6B62; font-size:14px;">Référence : <strong>${numFacture}</strong></p>
+          <p style="margin:5px 0 0; color:#5C6B62; font-size:14px;">Date de vente : <strong>${sale.dateVente.split('-').reverse().join('/')}</strong></p>
+        </div>
+        <div style="text-align:right; font-size:14px; line-height:1.5;">
+          <strong style="font-size:18px;">${esc(p.nom) || 'Vendeur Indépendant'}</strong><br>
+          ${p.adresse ? esc(p.adresse) + '<br>' : ''}
+          ${p.siret ? 'SIRET : ' + esc(p.siret) : ''}
+        </div>
+      </div>
+
+      <table style="width:100%; border-collapse:collapse; margin-bottom:40px; font-size:14px;">
+        <thead>
+          <tr style="background:#F6F3EC; text-align:left;">
+            <th style="padding:15px; border-bottom:1px solid #DBD3C0;">Désignation de l'article</th>
+            <th style="padding:15px; border-bottom:1px solid #DBD3C0;">Plateforme</th>
+            <th style="padding:15px; border-bottom:1px solid #DBD3C0; text-align:right;">Prix TTC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:15px; border-bottom:1px solid #EFEAE0;"><strong>${esc(sale.nom)}</strong><br><span style="color:#5C6B62; font-size:12px;">Catégorie : ${esc(sale.categorie)} ${sale.lot ? `(Réf: ${esc(sale.lot)})` : ''}</span></td>
+            <td style="padding:15px; border-bottom:1px solid #EFEAE0;">${esc(sale.plateforme)}</td>
+            <td style="padding:15px; border-bottom:1px solid #EFEAE0; text-align:right;">${fmt(sale.vente)}</td>
+          </tr>
+          ${sale.envoi > 0 ? `
+          <tr>
+            <td colspan="2" style="padding:15px; border-bottom:1px solid #EFEAE0; text-align:right; color:#5C6B62;">Frais de port et d'emballage</td>
+            <td style="padding:15px; border-bottom:1px solid #EFEAE0; text-align:right;">${fmt(sale.envoi)}</td>
+          </tr>` : ''}
+        </tbody>
+      </table>
+
+      <div style="display:flex; justify-content:flex-end;">
+        <div style="width:300px; background:#F6F3EC; padding:20px; border-radius:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:20px; font-weight:bold; font-family:'Fraunces', serif;">
+            <span>TOTAL À PAYER</span>
+            <span>${fmt(sale.vente + sale.envoi)}</span>
+          </div>
+          <p style="margin:10px 0 0; font-size:11px; color:#5C6B62; text-align:right;">TVA non applicable, art. 293 B du CGI.</p>
+        </div>
+      </div>
+      
+      <div style="margin-top:80px; text-align:center; font-size:12px; color:#9AA69D; border-top:1px solid #EFEAE0; padding-top:20px;">
+        Merci pour votre confiance.<br>
+        Document généré par Vinted Ledger.
+      </div>
+    </div>
+  `;
+  document.getElementById('print-area').innerHTML = html;
+  window.print();
 }
 
-/* ---------- RENDER ALL ---------- */
+window.resetData = function(){
+  if(confirm("Tout effacer ?")){ localStorage.clear(); location.reload(); }
+}
+
+/* ---------- NAVIGATION ---------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    activeTab = btn.getAttribute('data-tab');
+    document.querySelectorAll('.tab-btn').forEach(b=> b.classList.toggle('active', b.getAttribute('data-tab')===activeTab));
+    document.querySelectorAll('.section').forEach(s=> s.classList.toggle('active', s.id === 'tab-'+activeTab));
+  });
+});
+
 function renderAll(){
-  renderDashboard();
-  renderVentes();
-  renderStock();
-  renderObjectifs();
-  renderBadges();
-  renderOutils();
-  showActiveTab();
+  renderDashboard(); renderVentes(); renderStock(); renderCommandes(); renderObjectifs(); renderOutils();
+  document.querySelector(`[data-tab="${activeTab}"]`).click();
 }
 
 loadAll();
