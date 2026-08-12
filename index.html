@@ -51,11 +51,9 @@
   .section.active{display:block;animation:fadeIn .25s ease;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
 
-  /* cards */
   .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:16px;}
   .card-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;margin:0 0 14px;display:flex;justify-content:space-between;align-items:center;}
 
-  /* stats grid */
   .stats{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px;margin-bottom:16px;}
   .stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;}
   .stat.hero{background:var(--ink);color:var(--paper);border-color:var(--ink);}
@@ -64,16 +62,24 @@
   .stat.hero .stat-value{font-size:26px;}
   .pos{color:var(--green);} .neg{color:var(--rust);}
   .stat.hero .pos{color:#8FD9AE;} .stat.hero .neg{color:#F0A98F;}
-  .stats-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
 
-  /* Leaderboard / Ranking */
+  .chart-container { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding-top: 10px; margin-bottom: 10px; border-bottom: 1px dashed var(--border); }
+  .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 6px; }
+  .chart-bar { width: 100%; max-width: 30px; background: var(--green); border-radius: 4px 4px 0 0; min-height: 2px; transition: height 0.5s ease; }
+  .chart-bar.neg { background: var(--rust); }
+  .chart-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink-soft); }
+
   .ranking-list{display:flex;flex-direction:column;gap:8px;}
   .ranking-item{display:flex;align-items:center;padding:10px;border-radius:12px;background:var(--paper-alt);gap:12px;}
   .rank-num{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--mustard);width:24px;text-align:center;}
   .rank-info{flex:1;font-size:14px;}
   .rank-profit{font-family:'Fraunces',serif;font-size:16px;font-weight:600;}
 
-  /* forms */
+  .progress-track{background:var(--paper-alt);border-radius:999px;height:12px;overflow:hidden;margin:12px 0 8px;}
+  .progress-fill{height:100%;background:var(--green);border-radius:999px;transition:width .4s ease;}
+  .progress-fill.over{background:var(--mustard);}
+  .progress-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;}
+
   label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;font-weight:500;}
   input[type=text],input[type=number],input[type=date],select{
     width:100%;border:1px solid var(--border);background:var(--paper);border-radius:9px;padding:9px 10px;
@@ -86,16 +92,16 @@
   .btn:hover{opacity:0.88;}
   .btn-primary{background:var(--ink);color:var(--paper);width:100%;}
   .btn-success{background:var(--green);color:#fff;width:100%;}
-  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--ink);}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--ink);width:100%;}
   .btn-sm{padding:7px 12px;font-size:12px;border-radius:8px;}
   .btn-danger{background:var(--rust-soft);color:var(--rust);border:1px solid var(--rust);}
   .btn-row{display:flex;gap:8px;}
 
   .section-title{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-soft);margin:22px 0 12px;display:flex;justify-content:space-between;align-items:center;}
 
-  /* tag cards */
   .tag{position:relative;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 16px 14px 20px;margin-bottom:14px;}
   .tag::before{content:"";position:absolute;left:-1px;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--cat-color, var(--mustard));}
+  .tag.expense::before{background:var(--rust);}
   .tag-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
   .tag-name{font-family:'Fraunces',serif;font-weight:600;font-size:16px;}
   .tag-cat{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;border-radius:999px;margin-top:4px;}
@@ -111,18 +117,17 @@
 
   .empty{text-align:center;padding:34px 20px;color:var(--ink-soft);background:var(--card);border:1px dashed var(--border);border-radius:14px;font-size:13.5px;}
 
-  /* toast */
   #toasts{position:fixed;bottom:16px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:60;pointer-events:none;}
   .toast{background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-size:13px;font-family:'Inter',sans-serif;font-weight:500;opacity:0;transform:translateY(10px);transition:all .3s ease;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
   .toast.show{opacity:1;transform:translateY(0);}
 
-  /* print area for invoices */
+  /* print area for internal archives */
   #print-area { display: none; }
   @media print {
     body * { visibility: hidden; }
     #print-area, #print-area * { visibility: visible; }
     #print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; margin:0; padding:20px; background: white !important; color: black !important; font-family: 'Inter', sans-serif;}
-    body { background: white !important; }
+    body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
 </head>
@@ -141,10 +146,12 @@
   </header>
 
   <nav class="tabs">
-    <button class="tab-btn" data-tab="dashboard">📊 Tableau de bord</button>
+    <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
     <button class="tab-btn" data-tab="ventes">🏷️ Ventes</button>
     <button class="tab-btn" data-tab="stock">📦 Stock</button>
-    <button class="tab-btn" data-tab="commandes">🛒 Commandes</button>
+    <button class="tab-btn" data-tab="commandes">🗂️ Archives / Lots</button>
+    <button class="tab-btn" data-tab="frais">💸 Frais</button>
+    <button class="tab-btn" data-tab="objectifs">🎯 Objectifs</button>
     <button class="tab-btn" data-tab="outils">🛠️ Outils</button>
   </nav>
 
@@ -152,6 +159,8 @@
   <section class="section" id="tab-ventes"></section>
   <section class="section" id="tab-stock"></section>
   <section class="section" id="tab-commandes"></section>
+  <section class="section" id="tab-frais"></section>
+  <section class="section" id="tab-objectifs"></section>
   <section class="section" id="tab-outils"></section>
 </div>
 
@@ -160,16 +169,19 @@
 const CATEGORIES = ['Vêtements femme','Vêtements homme','Enfant','Chaussures','Accessoires','Maison','Autre'];
 const PLATEFORMES = ['Vinted', 'Leboncoin', 'Depop', 'Vestiaire Co.', 'Autre'];
 const CAT_COLORS = ['#B5482E','#3B6E8F','#D9A441','#7A5C9E','#2F6E4F','#8A8F5C','#6B6B6B'];
+const MONTHS_FR = ['Jan','Fév','Mar','Avr','Mai','Jui','Jul','Aoû','Sep','Oct','Nov','Déc'];
 
 /* ---------- STATE ---------- */
 let sales = [];
 let stock = [];
-let settings = { theme: 'light', profil: { nom:'', adresse:'', siret:'' } };
+let expenses = [];
+let settings = { theme: 'light', objectifMensuel: 200, profil: { nom:'', adresse:'', siret:'' } };
 let loaded = false;
 let activeTab = 'dashboard';
 let editingSaleId = null;
 let editingStockId = null;
-let sellingStockId = null; // ID de l'article en stock en cours de vente
+let sellingStockId = null; 
+let searchVentes = '';
 
 /* ---------- HELPERS ---------- */
 const uid = () => 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8);
@@ -187,12 +199,17 @@ function loadAll(){
   try{ const r = localStorage.getItem('vinted-settings-v3'); if(r) settings = Object.assign(settings, JSON.parse(r)); } catch(e){}
   try{ const r = localStorage.getItem('vinted-sales-v3'); if(r) sales = JSON.parse(r); } catch(e){}
   try{ const r = localStorage.getItem('vinted-stock-v3'); if(r) stock = JSON.parse(r); } catch(e){}
+  try{ const r = localStorage.getItem('vinted-expenses-v3'); if(r) expenses = JSON.parse(r); } catch(e){}
+  
   if(!settings.profil) settings.profil = { nom:'', adresse:'', siret:'' };
+  if(!settings.objectifMensuel) settings.objectifMensuel = 200;
+  
   loaded = true;
   applyTheme(); renderAll();
 }
 function saveSales(){ localStorage.setItem('vinted-sales-v3', JSON.stringify(sales)); }
 function saveStock(){ localStorage.setItem('vinted-stock-v3', JSON.stringify(stock)); }
+function saveExpenses(){ localStorage.setItem('vinted-expenses-v3', JSON.stringify(expenses)); }
 function saveSettings(){ localStorage.setItem('vinted-settings-v3', JSON.stringify(settings)); }
 
 /* ---------- THEME & TOAST ---------- */
@@ -216,43 +233,63 @@ function showToast(msg){
 function renderDashboard(){
   const el = document.getElementById('tab-dashboard');
   if(!loaded) return;
-  const totalVentes = sales.reduce((a,s)=>a+s.vente,0);
-  const totalProfit = sales.reduce((a,s)=>a+profit(s),0);
-  const curMonthProfit = sales.filter(s=>monthKey(s.dateVente)===todayStr().slice(0,7)).reduce((a,s)=>a+profit(s),0);
-  const avgMargin = sales.length ? sales.reduce((a,s)=>a+marginPct(s),0)/sales.length : 0;
   
-  // Classement Top 5
+  const totalVentes = sales.reduce((a,s)=>a+s.vente,0);
+  const rawProfit = sales.reduce((a,s)=>a+profit(s),0);
+  const totalExpenses = expenses.reduce((a,e)=>a+e.montant,0);
+  const netProfit = rawProfit - totalExpenses; 
+  
+  const avgMargin = sales.length ? sales.reduce((a,s)=>a+marginPct(s),0)/sales.length : 0;
   const topSales = [...sales].sort((a,b) => profit(b) - profit(a)).slice(0, 5);
+
+  let chartData = [];
+  let maxChartProfit = 1;
+  for(let i=5; i>=0; i--){
+    let d = new Date(); d.setMonth(d.getMonth() - i);
+    let mk = d.toISOString().slice(0,7);
+    let mProf = sales.filter(s=>monthKey(s.dateVente)===mk).reduce((a,s)=>a+profit(s),0) - expenses.filter(e=>monthKey(e.dateFrais)===mk).reduce((a,e)=>a+e.montant,0);
+    chartData.push({ label: MONTHS_FR[d.getMonth()], profit: mProf });
+    if(Math.abs(mProf) > maxChartProfit) maxChartProfit = Math.abs(mProf);
+  }
 
   let html = `
     <div class="stats">
       <div class="stat hero">
-        <div class="stat-label">Bénéfice total</div>
-        <div class="stat-value ${totalProfit>=0?'pos':'neg'}">${fmt(totalProfit)}</div>
+        <div class="stat-label">Bénéfice Net</div>
+        <div class="stat-value ${netProfit>=0?'pos':'neg'}">${fmt(netProfit)}</div>
       </div>
       <div class="stat"><div class="stat-label">Ventes</div><div class="stat-value">${sales.length}</div></div>
       <div class="stat"><div class="stat-label">Marge moy.</div><div class="stat-value">${sales.length?fmtPct(avgMargin):'—'}</div></div>
     </div>
-    <div class="stats-row2">
-      <div class="stat"><div class="stat-label">Chiffre d'affaires</div><div class="stat-value" style="font-size:18px;">${fmt(totalVentes)}</div></div>
-      <div class="stat"><div class="stat-label">Bénéfice du mois</div><div class="stat-value" style="font-size:18px;">${fmt(curMonthProfit)}</div></div>
+    
+    <div class="card" style="padding-bottom:10px;">
+      <p class="card-title">Évolution des bénéfices (6 mois)</p>
+      <div class="chart-container">
+        ${chartData.map(d => {
+          let heightPct = Math.max((Math.abs(d.profit) / maxChartProfit) * 100, 2);
+          let isNeg = d.profit < 0;
+          return `<div class="chart-bar-wrap">
+            <span style="font-size:10px; font-weight:600; color:${isNeg?'var(--rust)':'var(--green)'};">${Math.round(d.profit)}€</span>
+            <div class="chart-bar ${isNeg?'neg':''}" style="height:${heightPct}%;"></div>
+            <div class="chart-label">${d.label}</div>
+          </div>`;
+        }).join('')}
+      </div>
     </div>
     
     <div class="card">
-      <p class="card-title">🏆 Top 5 des ventes les plus rentables</p>
+      <p class="card-title">🏆 Top 5 des ventes</p>
   `;
   
-  if(topSales.length === 0){
-    html += `<div class="empty">Aucune vente enregistrée pour le moment.</div>`;
-  } else {
-    html += `<div class="ranking-list">` + topSales.map((s, i) => `
+  if(topSales.length === 0) html += `<div class="empty">Aucune vente enregistrée.</div>`;
+  else html += `<div class="ranking-list">` + topSales.map((s, i) => `
       <div class="ranking-item">
         <div class="rank-num">${i+1}</div>
         <div class="rank-info"><strong>${esc(s.nom)}</strong><br><span style="font-size:11px;color:var(--ink-soft);">${esc(s.plateforme)} • Achat: ${fmt(s.achat)}</span></div>
         <div class="rank-profit" style="color:var(--green);font-weight:bold;">+ ${fmt(profit(s))}</div>
       </div>
     `).join('') + `</div>`;
-  }
+    
   html += `</div>`;
   el.innerHTML = html;
 }
@@ -272,7 +309,7 @@ function saleFormHtml(s, prefix = 'f'){
       <div><label>Frais d'envoi (€)</label><input type="number" step="0.01" min="0" id="${prefix}-envoi" value="${s.envoi||''}"></div>
       <div><label>Autres frais (€)</label><input type="number" step="0.01" min="0" id="${prefix}-autres" value="${s.autres||''}"></div>
       <div><label>Date de vente</label><input type="date" id="${prefix}-datevente" value="${s.dateVente||''}"></div>
-      <div><label>Réf. Commande / Lot</label><input type="text" id="${prefix}-lot" value="${esc(s.lot||'')}" placeholder="Ex : Lot Friperie #1"></div>
+      <div><label>Réf. Archive / Lot</label><input type="text" id="${prefix}-lot" value="${esc(s.lot||'')}" placeholder="Ex : Lot Friperie #1"></div>
     </div>
   `;
 }
@@ -280,7 +317,9 @@ function saleFormHtml(s, prefix = 'f'){
 function renderVentes(){
   const el = document.getElementById('tab-ventes');
   if(!loaded) return;
+  
   let list = sales.slice().sort((a,b)=>(b.dateVente||'').localeCompare(a.dateVente||''));
+  if(searchVentes) list = list.filter(s => s.nom.toLowerCase().includes(searchVentes.toLowerCase()) || (s.lot && s.lot.toLowerCase().includes(searchVentes.toLowerCase())));
 
   el.innerHTML = `
     <div class="card">
@@ -288,10 +327,14 @@ function renderVentes(){
       ${saleFormHtml(null, 'f')}
       <button class="btn btn-primary" id="addSaleBtn">Ajouter la vente</button>
     </div>
-    <p class="section-title"><span>Historique (${sales.length})</span></p>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:22px 0 12px;">
+      <p class="section-title" style="margin:0;"><span>Historique (${list.length})</span></p>
+      <input type="text" id="searchVentes" placeholder="🔍 Rechercher..." value="${esc(searchVentes)}" style="width:140px; padding:6px 10px; font-size:12px;">
+    </div>
     <div id="salesList">${list.map(s => saleCardHtml(s)).join('')}</div>
   `;
   document.getElementById('addSaleBtn').addEventListener('click', onAddSale);
+  document.getElementById('searchVentes').addEventListener('input', (e) => { searchVentes = e.target.value; renderVentes(); });
   bindSaleCardEvents();
 }
 
@@ -308,11 +351,10 @@ function saleCardHtml(s){
       <div class="tag-top">
         <div><div class="tag-name">${esc(s.nom)}</div><span class="tag-cat" style="color:${catColor(s.categorie)};">${esc(s.categorie)}</span></div>
       </div>
-      <div class="tag-detail">Achat ${fmt(s.achat)} · Vente ${fmt(s.vente)} ${s.lot ? `· 📦 <strong>${esc(s.lot)}</strong>` : ''}</div>
+      <div class="tag-detail">Achat ${fmt(s.achat)} · Vente ${fmt(s.vente)} ${s.lot ? `· 🗂️ <strong>${esc(s.lot)}</strong>` : ''}</div>
       <div class="tag-bottom">
         <div><div class="tag-profit-label">Bénéfice</div><div class="tag-profit-value" style="color:${p>=0?'var(--green)':'var(--rust)'}">${fmt(p)}</div></div>
         <div class="tag-actions">
-          <button class="link-btn" onclick="printFacture('${s.id}')">📄 Facture</button>
           <button class="link-btn edit" data-edit="${s.id}">Modifier</button>
           <button class="link-btn" data-del="${s.id}">Supprimer</button>
         </div>
@@ -329,14 +371,10 @@ function bindSaleCardEvents(){
   document.querySelectorAll('[data-save-edit]').forEach(b => b.addEventListener('click', e=>{
     const s = sales.find(x=>x.id===e.target.getAttribute('data-save-edit'));
     if(s){
-      s.nom = document.getElementById('fe-nom').value;
-      s.plateforme = document.getElementById('fe-plat').value;
-      s.categorie = document.getElementById('fe-cat').value;
-      s.vente = parseFloat(document.getElementById('fe-vente').value)||0;
-      s.achat = parseFloat(document.getElementById('fe-achat').value)||0;
-      s.envoi = parseFloat(document.getElementById('fe-envoi').value)||0;
-      s.autres = parseFloat(document.getElementById('fe-autres').value)||0;
-      s.dateVente = document.getElementById('fe-datevente').value;
+      s.nom = document.getElementById('fe-nom').value; s.plateforme = document.getElementById('fe-plat').value;
+      s.categorie = document.getElementById('fe-cat').value; s.vente = parseFloat(document.getElementById('fe-vente').value)||0;
+      s.achat = parseFloat(document.getElementById('fe-achat').value)||0; s.envoi = parseFloat(document.getElementById('fe-envoi').value)||0;
+      s.autres = parseFloat(document.getElementById('fe-autres').value)||0; s.dateVente = document.getElementById('fe-datevente').value;
       s.lot = document.getElementById('fe-lot').value;
       editingSaleId = null; saveSales(); renderAll(); showToast('Vente modifiée');
     }
@@ -344,32 +382,27 @@ function bindSaleCardEvents(){
 }
 
 function onAddSale(){
-  const nom = document.getElementById('f-nom').value.trim();
-  const vente = parseFloat(document.getElementById('f-vente').value)||0;
+  const nom = document.getElementById('f-nom').value.trim(); const vente = parseFloat(document.getElementById('f-vente').value)||0;
   if(!nom || !vente) return alert("Nom et Prix de vente obligatoires.");
   sales.push({
     id: uid(), nom, plateforme: document.getElementById('f-plat').value, categorie: document.getElementById('f-cat').value,
     achat: parseFloat(document.getElementById('f-achat').value)||0, vente,
     envoi: parseFloat(document.getElementById('f-envoi').value)||0, autres: parseFloat(document.getElementById('f-autres').value)||0,
-    dateVente: document.getElementById('f-datevente').value || todayStr(),
-    lot: document.getElementById('f-lot').value.trim()
+    dateVente: document.getElementById('f-datevente').value || todayStr(), lot: document.getElementById('f-lot').value.trim()
   });
   saveSales(); renderAll(); showToast('Vente ajoutée !');
 }
-
 
 /* ---------- RENDER: STOCK ---------- */
 function stockFormHtml(s, prefix = 'stk'){
   s = s || { nom:'', categorie:CATEGORIES[0], plateforme:'Vinted', achat:'', lot:''};
   return `
-    <div class="form-grid full">
-      <div><label>Article (Stock)</label><input type="text" id="${prefix}-nom" value="${esc(s.nom)}" placeholder="Ex : Veste en Jean Levi's"></div>
-    </div>
+    <div class="form-grid full"><div><label>Article (Stock)</label><input type="text" id="${prefix}-nom" value="${esc(s.nom)}" placeholder="Ex : Veste en Jean Levi's"></div></div>
     <div class="form-grid">
       <div><label>Plateforme prévue</label><select id="${prefix}-plat">${PLATEFORMES.map(p=>`<option value="${p}" ${(s.plateforme||'Vinted')===p?'selected':''}>${p}</option>`).join('')}</select></div>
       <div><label>Catégorie</label><select id="${prefix}-cat">${CATEGORIES.map(c=>`<option value="${c}" ${s.categorie===c?'selected':''}>${c}</option>`).join('')}</select></div>
       <div><label>Prix d'achat (€)</label><input type="number" step="0.01" min="0" id="${prefix}-achat" value="${s.achat||''}"></div>
-      <div><label>Réf. Commande / Lot</label><input type="text" id="${prefix}-lot" value="${esc(s.lot||'')}" placeholder="Ex : Lot Friperie #1"></div>
+      <div><label>Réf. Archive / Lot</label><input type="text" id="${prefix}-lot" value="${esc(s.lot||'')}" placeholder="Ex : Lot Friperie #1"></div>
     </div>
   `;
 }
@@ -377,39 +410,23 @@ function stockFormHtml(s, prefix = 'stk'){
 function renderStock(){
   const el = document.getElementById('tab-stock');
   if(!loaded) return;
-  
   const totalInvesti = stock.reduce((a,s)=>a+(s.achat||0), 0);
-
   el.innerHTML = `
-    <div class="card">
-      <p class="card-title">Ajouter un article en stock</p>
-      ${stockFormHtml(null, 'stk')}
-      <button class="btn btn-primary" id="addStockBtn">Ajouter au stock</button>
-    </div>
-    
+    <div class="card"><p class="card-title">Ajouter un article en stock</p>${stockFormHtml(null, 'stk')}<button class="btn btn-primary" id="addStockBtn">Ajouter au stock</button></div>
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <p class="section-title"><span>Mon Stock Actuel (${stock.length})</span></p>
       <span style="font-size:12px; font-weight:600; color:var(--ink);">Valeur investie : ${fmt(totalInvesti)}</span>
     </div>
-    
-    <div id="stockList">
-      ${stock.length === 0 ? `<div class="empty">Ton stock est vide.</div>` : stock.map(s => stockCardHtml(s)).join('')}
-    </div>
+    <div id="stockList">${stock.length === 0 ? `<div class="empty">Ton stock est vide.</div>` : stock.map(s => stockCardHtml(s)).join('')}</div>
   `;
   document.getElementById('addStockBtn').addEventListener('click', onAddStock);
   bindStockCardEvents();
 }
 
 function stockCardHtml(s){
-  // Formulaire d'édition
   if(editingStockId === s.id){
-    return `<div class="tag">
-      ${stockFormHtml(s, 'estk')}
-      <div class="btn-row"><button class="btn btn-primary btn-sm" data-save-stock="${s.id}">Enregistrer</button><button class="btn btn-ghost btn-sm" data-cancel-stock="1">Annuler</button></div>
-    </div>`;
+    return `<div class="tag">${stockFormHtml(s, 'estk')}<div class="btn-row"><button class="btn btn-primary btn-sm" data-save-stock="${s.id}">Enregistrer</button><button class="btn btn-ghost btn-sm" data-cancel-stock="1">Annuler</button></div></div>`;
   }
-  
-  // Formulaire pour "Vendre" l'article depuis le stock
   if(sellingStockId === s.id){
     return `<div class="tag" style="border: 2px solid var(--green);">
       <p style="font-family:'Fraunces',serif; font-size:15px; margin:0 0 10px; color:var(--green);">💰 Vendre : ${esc(s.nom)}</p>
@@ -419,19 +436,13 @@ function stockCardHtml(s){
         <div><label>Autres frais (€)</label><input type="number" step="0.01" min="0" id="sell-autres" value="0"></div>
         <div><label>Date de vente</label><input type="date" id="sell-date" value="${todayStr()}"></div>
       </div>
-      <div class="btn-row" style="margin-top:10px;">
-        <button class="btn btn-success btn-sm" data-confirm-sell="${s.id}">Valider la vente</button>
-        <button class="btn btn-ghost btn-sm" data-cancel-sell="1">Annuler</button>
-      </div>
+      <div class="btn-row" style="margin-top:10px;"><button class="btn btn-success btn-sm" data-confirm-sell="${s.id}">Valider la vente</button><button class="btn btn-ghost btn-sm" data-cancel-sell="1">Annuler</button></div>
     </div>`;
   }
-
   return `
     <div class="tag" style="--cat-color:${catColor(s.categorie)}">
-      <div class="tag-top">
-        <div><div class="tag-name">${esc(s.nom)}</div><span class="tag-cat" style="color:${catColor(s.categorie)};">${esc(s.categorie)}</span></div>
-      </div>
-      <div class="tag-detail">Acheté : ${fmt(s.achat)} ${s.lot ? `· 📦 <strong>${esc(s.lot)}</strong>` : ''}</div>
+      <div class="tag-top"><div><div class="tag-name">${esc(s.nom)}</div><span class="tag-cat" style="color:${catColor(s.categorie)};">${esc(s.categorie)}</span></div></div>
+      <div class="tag-detail">Acheté : ${fmt(s.achat)} ${s.lot ? `· 🗂️ <strong>${esc(s.lot)}</strong>` : ''}</div>
       <div class="tag-bottom">
         <div><span style="font-size:11px; color:var(--ink-soft);">${esc(s.plateforme)}</span></div>
         <div class="tag-actions">
@@ -444,69 +455,43 @@ function stockCardHtml(s){
 }
 
 function bindStockCardEvents(){
-  // Edit
   document.querySelectorAll('[data-edit-stock]').forEach(b => b.addEventListener('click', e=>{ editingStockId = e.target.getAttribute('data-edit-stock'); sellingStockId = null; renderStock(); }));
   document.querySelectorAll('[data-cancel-stock]').forEach(b => b.addEventListener('click', ()=>{ editingStockId = null; renderStock(); }));
   document.querySelectorAll('[data-save-stock]').forEach(b => b.addEventListener('click', e=>{
     const s = stock.find(x=>x.id===e.target.getAttribute('data-save-stock'));
     if(s){
-      s.nom = document.getElementById('estk-nom').value;
-      s.plateforme = document.getElementById('estk-plat').value;
-      s.categorie = document.getElementById('estk-cat').value;
-      s.achat = parseFloat(document.getElementById('estk-achat').value)||0;
+      s.nom = document.getElementById('estk-nom').value; s.plateforme = document.getElementById('estk-plat').value;
+      s.categorie = document.getElementById('estk-cat').value; s.achat = parseFloat(document.getElementById('estk-achat').value)||0;
       s.lot = document.getElementById('estk-lot').value;
       editingStockId = null; saveStock(); renderAll(); showToast('Stock modifié');
     }
   }));
-  // Delete
   document.querySelectorAll('[data-del-stock]').forEach(b => b.addEventListener('click', e=>{
     if(confirm('Supprimer cet article du stock ?')){ stock = stock.filter(s=>s.id!==e.target.getAttribute('data-del-stock')); saveStock(); renderAll(); }
   }));
-  
-  // Sell
   document.querySelectorAll('[data-sell]').forEach(b => b.addEventListener('click', e=>{ sellingStockId = e.target.getAttribute('data-sell'); editingStockId = null; renderStock(); }));
   document.querySelectorAll('[data-cancel-sell]').forEach(b => b.addEventListener('click', ()=>{ sellingStockId = null; renderStock(); }));
   document.querySelectorAll('[data-confirm-sell]').forEach(b => b.addEventListener('click', e=>{
-    const id = e.target.getAttribute('data-confirm-sell');
-    const s = stock.find(x=>x.id===id);
+    const id = e.target.getAttribute('data-confirm-sell'); const s = stock.find(x=>x.id===id);
     const vente = parseFloat(document.getElementById('sell-vente').value)||0;
-    
     if(!vente) return alert("Veuillez indiquer un prix de vente !");
-    
-    // Transfert vers les ventes
     sales.push({
-      id: uid(), nom: s.nom, plateforme: s.plateforme, categorie: s.categorie,
-      achat: s.achat, vente: vente,
-      envoi: parseFloat(document.getElementById('sell-envoi').value)||0, 
-      autres: parseFloat(document.getElementById('sell-autres').value)||0,
-      dateVente: document.getElementById('sell-date').value || todayStr(),
-      lot: s.lot
+      id: uid(), nom: s.nom, plateforme: s.plateforme, categorie: s.categorie, achat: s.achat, vente: vente,
+      envoi: parseFloat(document.getElementById('sell-envoi').value)||0, autres: parseFloat(document.getElementById('sell-autres').value)||0,
+      dateVente: document.getElementById('sell-date').value || todayStr(), lot: s.lot
     });
-    
-    // Suppression du stock
-    stock = stock.filter(x => x.id !== id);
-    sellingStockId = null;
-    
-    saveSales(); saveStock(); 
-    activeTab = 'ventes'; // Rediriger vers l'onglet ventes pour voir le résultat
-    renderAll(); 
-    showToast('Félicitations pour cette vente ! 🎉');
+    stock = stock.filter(x => x.id !== id); sellingStockId = null;
+    saveSales(); saveStock(); activeTab = 'ventes'; renderAll(); showToast('Félicitations pour cette vente ! 🎉');
   }));
 }
-
 function onAddStock(){
-  const nom = document.getElementById('stk-nom').value.trim();
-  const achat = parseFloat(document.getElementById('stk-achat').value)||0;
+  const nom = document.getElementById('stk-nom').value.trim(); const achat = parseFloat(document.getElementById('stk-achat').value)||0;
   if(!nom) return alert("Le nom de l'article est obligatoire.");
-  stock.push({
-    id: uid(), nom, plateforme: document.getElementById('stk-plat').value, categorie: document.getElementById('stk-cat').value,
-    achat, lot: document.getElementById('stk-lot').value.trim()
-  });
+  stock.push({ id: uid(), nom, plateforme: document.getElementById('stk-plat').value, categorie: document.getElementById('stk-cat').value, achat, lot: document.getElementById('stk-lot').value.trim() });
   saveStock(); renderAll(); showToast('Ajouté au stock !');
 }
 
-
-/* ---------- RENDER: COMMANDES / LOTS ---------- */
+/* ---------- RENDER: COMMANDES / ARCHIVES ---------- */
 function renderCommandes(){
   const el = document.getElementById('tab-commandes');
   if(!loaded) return;
@@ -515,32 +500,33 @@ function renderCommandes(){
   sales.forEach(s => {
     if(!s.lot) return;
     const l = s.lot.trim();
-    if(!lotsMap[l]) lotsMap[l] = { nom: l, ventes: [], totalVente: 0, totalAchat: 0, totalFrais: 0 };
-    lotsMap[l].ventes.push(s);
-    lotsMap[l].totalVente += s.vente;
-    lotsMap[l].totalAchat += s.achat;
-    lotsMap[l].totalFrais += (s.envoi + s.autres);
+    if(!lotsMap[l]) lotsMap[l] = { nom: l, ventes: [], totalVente: 0, totalAchat: 0, totalFrais: 0, dateRecent: s.dateVente };
+    lotsMap[l].ventes.push(s); lotsMap[l].totalVente += s.vente; lotsMap[l].totalAchat += s.achat; lotsMap[l].totalFrais += (s.envoi + s.autres);
+    if(s.dateVente > lotsMap[l].dateRecent) lotsMap[l].dateRecent = s.dateVente;
   });
-  const lotsArray = Object.values(lotsMap).sort((a,b)=> (b.totalVente - b.totalAchat - b.totalFrais) - (a.totalVente - a.totalAchat - a.totalFrais));
+  const lotsArray = Object.values(lotsMap).sort((a,b)=> b.dateRecent.localeCompare(a.dateRecent));
 
   el.innerHTML = `
     <div class="card">
-      <p class="card-title">Bénéfices par Commandes / Lots</p>
-      <p style="font-size:13px;color:var(--ink-soft);margin:-10px 0 15px;">Assigne un "Lot / Réf. Commande" à tes ventes ou à ton stock pour analyser la rentabilité d'un achat groupé.</p>
+      <p class="card-title">Archives de Rentabilité / Lots</p>
+      <p style="font-size:13px;color:var(--ink-soft);margin:-10px 0 15px;">Les articles ayant la même référence de "Réf. Archive / Lot" sont regroupés ici. Imprime une fiche interne pour analyser ta rentabilité !</p>
       
-      ${lotsArray.length === 0 ? `<div class="empty">Aucune commande enregistrée.</div>` : 
+      ${lotsArray.length === 0 ? `<div class="empty">Aucune archive enregistrée. Ajoute un nom de lot à tes ventes.</div>` : 
       lotsArray.map(lot => {
         const benef = lot.totalVente - lot.totalAchat - lot.totalFrais;
         return `
-        <div style="border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <strong style="font-family:'Fraunces',serif; font-size:16px;">📦 ${esc(lot.nom)}</strong>
-            <span style="font-family:'IBM Plex Mono', monospace; font-size:12px; background:var(--paper-alt); padding:4px 8px; border-radius:6px;">${lot.ventes.length} article(s)</span>
+        <div style="border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px; background:var(--card);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+            <div>
+              <strong style="font-family:'Fraunces',serif; font-size:16px;">🗂️ ${esc(lot.nom)}</strong>
+              <div style="font-size:11px; color:var(--ink-soft); margin-top:4px;">${lot.ventes.length} article(s) • ${lot.dateRecent.split('-').reverse().join('/')}</div>
+            </div>
+            <button class="btn btn-sm btn-ghost" onclick="printArchiveLot('${esc(lot.nom.replace(/'/g, "\\'"))}')">📊 Fiche PDF</button>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; color:var(--ink-soft); margin-bottom:12px;">
-            <div>Investi : <strong>${fmt(lot.totalAchat)}</strong></div>
-            <div>Récupéré : <strong>${fmt(lot.totalVente)}</strong></div>
-            <div>Frais : <strong>${fmt(lot.totalFrais)}</strong></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; color:var(--ink-soft); margin-bottom:12px; background:var(--paper); padding:8px; border-radius:8px;">
+            <div>CA Total: <strong>${fmt(lot.totalVente)}</strong></div>
+            <div>Investi: <strong>${fmt(lot.totalAchat)}</strong></div>
+            <div style="grid-column: span 2;">Frais & Envois: <strong>${fmt(lot.totalFrais)}</strong></div>
           </div>
           <div style="border-top:1px dashed var(--border); padding-top:10px; display:flex; justify-content:space-between; align-items:center;">
             <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft);">Bénéfice Net</span>
@@ -553,101 +539,213 @@ function renderCommandes(){
   `;
 }
 
-/* ---------- RENDER: OUTILS & FACTURATION ---------- */
+/* ---------- RENDER: FRAIS GENERAUX ---------- */
+function renderFrais(){
+  const el = document.getElementById('tab-frais');
+  if(!loaded) return;
+  el.innerHTML = `
+    <div class="card">
+      <p class="card-title">Ajouter une dépense annexe</p>
+      <div class="form-grid full"><div><label>Description</label><input type="text" id="fr-nom" placeholder="Ex: Achat de cartons"></div></div>
+      <div class="form-grid"><div><label>Montant (€)</label><input type="number" step="0.01" min="0" id="fr-montant"></div><div><label>Date</label><input type="date" id="fr-date" value="${todayStr()}"></div></div>
+      <button class="btn btn-primary" id="addFraisBtn">Ajouter la dépense</button>
+    </div>
+    <p class="section-title"><span>Historique des dépenses (${expenses.length})</span></p>
+    <div>
+      ${expenses.length === 0 ? `<div class="empty">Aucun frais enregistré.</div>` : expenses.sort((a,b)=>b.dateFrais.localeCompare(a.dateFrais)).map(e => `
+        <div class="tag expense"><div class="tag-top"><div class="tag-name">${esc(e.nom)}</div><div style="font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--rust);">- ${fmt(e.montant)}</div></div>
+        <div class="tag-bottom"><span style="font-size:11px;color:var(--ink-soft);">${e.dateFrais.split('-').reverse().join('/')}</span><button class="link-btn" onclick="deleteExpense('${e.id}')">Supprimer</button></div></div>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('addFraisBtn').addEventListener('click', ()=>{
+    const nom = document.getElementById('fr-nom').value; const montant = parseFloat(document.getElementById('fr-montant').value);
+    if(!nom || !montant) return alert("Remplissez tous les champs.");
+    expenses.push({ id: uid(), nom, montant, dateFrais: document.getElementById('fr-date').value || todayStr() });
+    saveExpenses(); renderAll(); showToast('Frais ajouté');
+  });
+}
+window.deleteExpense = function(id){ if(confirm('Supprimer cette dépense ?')) { expenses = expenses.filter(e=>e.id!==id); saveExpenses(); renderAll(); } }
+
+/* ---------- RENDER: OBJECTIFS ---------- */
+function renderObjectifs(){
+  const el = document.getElementById('tab-objectifs');
+  if(!loaded) return;
+  const curMonthKey = todayStr().slice(0,7);
+  const curMonthProfit = sales.filter(s=>monthKey(s.dateVente)===curMonthKey).reduce((a,s)=>a+profit(s),0) - expenses.filter(e=>monthKey(e.dateFrais)===curMonthKey).reduce((a,e)=>a+e.montant,0);
+  const goal = settings.objectifMensuel || 1; 
+  let progress = Math.max(0, (curMonthProfit / goal) * 100);
+  const isOver = progress >= 100;
+  
+  el.innerHTML = `
+    <div class="card">
+      <p class="card-title">Objectif du mois en cours</p>
+      <div style="margin:20px 0;">
+        <div style="font-family:'Fraunces', serif; font-size:32px; font-weight:600; text-align:center; color:${isOver?'var(--green)':'var(--ink)'}">${fmt(curMonthProfit)} <span style="font-size:18px; color:var(--ink-soft)">/ ${fmt(goal)}</span></div>
+        <div class="progress-track"><div class="progress-fill ${isOver?'over':''}" style="width:${Math.min(progress, 100)}%;"></div></div>
+        <div class="progress-meta"><span>${isOver ? '🎉 Objectif atteint !' : 'En cours...'}</span><span>${Math.round(progress)}%</span></div>
+      </div>
+      <hr style="border:0; border-top:1px dashed var(--border); margin:20px 0;">
+      <div class="form-grid full"><div><label>Modifier l'objectif mensuel (€)</label><div style="display:flex; gap:10px;"><input type="number" step="10" id="goal-input" value="${goal}"><button class="btn btn-primary" id="saveGoalBtn" style="width:auto;">Valider</button></div></div></div>
+    </div>
+  `;
+  document.getElementById('saveGoalBtn').addEventListener('click', ()=>{ settings.objectifMensuel = parseFloat(document.getElementById('goal-input').value) || 0; saveSettings(); renderAll(); showToast('Objectif mis à jour !'); });
+}
+
+/* ---------- RENDER: OUTILS & SAUVEGARDE ---------- */
 function renderOutils(){
   const el = document.getElementById('tab-outils');
   if(!loaded) return;
-  const p = settings.profil;
   el.innerHTML = `
     <div class="card">
-      <p class="card-title">Profil de Facturation (Pro)</p>
-      <p style="font-size:12px;color:var(--ink-soft);margin:-10px 0 15px;">Ces informations apparaitront sur les factures PDF générées pour tes clients.</p>
-      <div class="form-grid full">
-        <div><label>Nom de la boutique / Entreprise</label><input type="text" id="prof-nom" value="${esc(p.nom)}" placeholder="Ex: Dressing de Sophie"></div>
-        <div><label>Adresse (Optionnel)</label><input type="text" id="prof-adr" value="${esc(p.adresse)}" placeholder="Ex: 10 rue de Paris, 75000"></div>
-        <div><label>N° SIRET (Optionnel)</label><input type="text" id="prof-siret" value="${esc(p.siret)}" placeholder="Ex: 123 456 789 00012"></div>
+      <p class="card-title">💾 Sauvegarde Complète</p>
+      <div class="btn-row" style="margin-bottom: 10px;">
+        <button class="btn btn-primary" onclick="exportJSON()">⬇️ Exporter (.json)</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('import-file').click()">⬆️ Importer</button>
+        <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importJSON(event)">
       </div>
-      <button class="btn btn-primary" id="saveProfilBtn">Enregistrer le profil</button>
+      <hr style="border:0; border-top:1px dashed var(--border); margin:15px 0;">
+      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;">Export Excel simple :</p>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV('sales')">📥 Excel Ventes (.csv)</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV('stock')">📥 Excel Stock (.csv)</button>
+      </div>
     </div>
+    
     <div class="card">
-      <p class="card-title">Export / Sauvegarde</p>
-      <button class="btn btn-ghost" onclick="resetData()" style="color:var(--rust); border-color:var(--rust);">Réinitialiser l'application</button>
+      <p class="card-title">Zone de danger</p>
+      <button class="btn btn-danger" onclick="resetData()" style="width:100%;">Réinitialiser toute l'application</button>
     </div>
   `;
-  document.getElementById('saveProfilBtn').addEventListener('click', ()=>{
-    settings.profil.nom = document.getElementById('prof-nom').value;
-    settings.profil.adresse = document.getElementById('prof-adr').value;
-    settings.profil.siret = document.getElementById('prof-siret').value;
-    saveSettings(); showToast('Profil mis à jour');
-  });
 }
 
-/* ---------- IMPRESSION FACTURE PRO ---------- */
-window.printFacture = function(saleId){
-  const sale = sales.find(s => s.id === saleId);
-  if(!sale) return;
+// JSON IMPORT EXPORT
+window.exportJSON = function(){
+  const data = { sales, stock, expenses, settings };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a"); link.setAttribute("href", url); link.setAttribute("download", `vinted_ledger_backup_${todayStr()}.json`);
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+window.importJSON = function(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const data = JSON.parse(e.target.result);
+      if(data.sales) { sales = data.sales; saveSales(); }
+      if(data.stock) { stock = data.stock; saveStock(); }
+      if(data.expenses) { expenses = data.expenses; saveExpenses(); }
+      if(data.settings) { settings = data.settings; saveSettings(); }
+      alert("Sauvegarde importée avec succès !"); location.reload();
+    } catch(err) { alert("Erreur lors de la lecture du fichier JSON."); }
+  };
+  reader.readAsText(file);
+}
+
+// CSV EXPORT
+window.exportCSV = function(type) {
+  let data = type === 'sales' ? sales : stock;
+  if(data.length === 0) return alert("Aucune donnée à exporter.");
+  const keys = Object.keys(data[0]).filter(k => k !== 'id');
+  let csvContent = keys.join(";") + "\n";
+  data.forEach(row => {
+    let rowData = keys.map(key => `"${String(row[key] === undefined || row[key] === null ? '' : row[key]).replace(/"/g, '""')}"`);
+    csvContent += rowData.join(";") + "\n";
+  });
+  const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); 
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a"); link.setAttribute("href", url); link.setAttribute("download", `vinted_ledger_${type}_${todayStr()}.csv`);
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+window.resetData = function(){ if(confirm("Attention : cela va effacer absolument toutes vos données. Confirmer ?")){ localStorage.clear(); location.reload(); } }
+
+/* ---------- IMPRESSION FICHE D'ARCHIVE ---------- */
+window.printArchiveLot = function(lotName){
+  const lotSales = sales.filter(s => s.lot === lotName);
+  if(!lotSales.length) return;
   
-  const p = settings.profil;
-  const numFacture = `F-${sale.dateVente.replace(/-/g,'')}-${Math.floor(Math.random()*1000)}`;
+  const recentDate = lotSales.reduce((max, s) => s.dateVente > max ? s.dateVente : max, lotSales[0].dateVente);
+  
+  const CA = lotSales.reduce((acc, s) => acc + s.vente, 0);
+  const Achats = lotSales.reduce((acc, s) => acc + s.achat, 0);
+  const Frais = lotSales.reduce((acc, s) => acc + (s.envoi + s.autres), 0);
+  const Benef = CA - Achats - Frais;
+  
+  // Calculs pour la barre de répartition (limité entre 0 et 100%)
+  const achatPct = CA > 0 ? Math.max(0, Math.min(100, (Achats / CA) * 100)) : 0;
+  const fraisPct = CA > 0 ? Math.max(0, Math.min(100, (Frais / CA) * 100)) : 0;
+  // Si le bénéfice est négatif, on ne l'affiche pas dans la barre
+  const benefPct = CA > 0 && Benef > 0 ? Math.max(0, Math.min(100, (Benef / CA) * 100)) : 0;
+
   const html = `
-    <div style="max-width:800px; margin:0 auto;">
-      <div style="display:flex; justify-content:space-between; border-bottom:3px solid #1E2A23; padding-bottom:30px; margin-bottom:40px;">
-        <div>
-          <h1 style="margin:0; font-size:36px; font-family:'Fraunces', serif; letter-spacing:-0.02em;">FACTURE</h1>
-          <p style="margin:10px 0 0; color:#5C6B62; font-size:14px;">Référence : <strong>${numFacture}</strong></p>
-          <p style="margin:5px 0 0; color:#5C6B62; font-size:14px;">Date de vente : <strong>${sale.dateVente.split('-').reverse().join('/')}</strong></p>
+    <div style="max-width:800px; margin:0 auto; color:#1E2A23;">
+      <div style="border-bottom:3px solid #1E2A23; padding-bottom:20px; margin-bottom:30px;">
+        <h1 style="margin:0; font-size:28px; font-family:'Fraunces', serif; letter-spacing:-0.02em;">FICHE DE RENTABILITÉ</h1>
+        <p style="margin:8px 0 0; color:#5C6B62; font-size:16px;">Lot / Réf : <strong>${esc(lotName)}</strong></p>
+        <p style="margin:4px 0 0; color:#5C6B62; font-size:13px;">Date d'édition : ${todayStr().split('-').reverse().join('/')}</p>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; gap:15px; margin-bottom:25px;">
+        <div style="flex:1; background:#F6F3EC; padding:15px; border-radius:12px; border:1px solid #DBD3C0;">
+          <div style="font-size:11px; text-transform:uppercase; color:#5C6B62; letter-spacing:0.05em; margin-bottom:5px;">Chiffre d'Affaires</div>
+          <div style="font-size:22px; font-weight:bold; font-family:'Fraunces',serif;">${fmt(CA)}</div>
         </div>
-        <div style="text-align:right; font-size:14px; line-height:1.5;">
-          <strong style="font-size:18px;">${esc(p.nom) || 'Vendeur Indépendant'}</strong><br>
-          ${p.adresse ? esc(p.adresse) + '<br>' : ''}
-          ${p.siret ? 'SIRET : ' + esc(p.siret) : ''}
+        <div style="flex:1; background:#F6F3EC; padding:15px; border-radius:12px; border:1px solid #DBD3C0;">
+          <div style="font-size:11px; text-transform:uppercase; color:#5C6B62; letter-spacing:0.05em; margin-bottom:5px;">Coûts & Frais</div>
+          <div style="font-size:22px; font-weight:bold; font-family:'Fraunces',serif; color:#B5482E;">${fmt(Achats + Frais)}</div>
+        </div>
+        <div style="flex:1; background:${Benef>=0?'#E4EFE8':'#F4E3DD'}; padding:15px; border-radius:12px; border:1px solid ${Benef>=0?'#8FD9AE':'#F0A98F'};">
+          <div style="font-size:11px; text-transform:uppercase; color:${Benef>=0?'#2F6E4F':'#B5482E'}; letter-spacing:0.05em; margin-bottom:5px;">Bénéfice Net</div>
+          <div style="font-size:22px; font-weight:bold; font-family:'Fraunces',serif; color:${Benef>=0?'#2F6E4F':'#B5482E'};">${fmt(Benef)}</div>
         </div>
       </div>
 
-      <table style="width:100%; border-collapse:collapse; margin-bottom:40px; font-size:14px;">
+      <div style="margin-bottom:40px;">
+        <p style="font-size:13px; font-weight:600; margin:0 0 10px;">Répartition Financière du CA :</p>
+        <!-- Graphique : Barre empilée CSS -->
+        <div style="display:flex; width:100%; height:24px; border-radius:12px; overflow:hidden; background:#EFEAE0; border:1px solid #DBD3C0;">
+          ${achatPct > 0 ? `<div style="width:${achatPct}%; background:#3B6E8F; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:bold; overflow:hidden;" title="Achats">Achats</div>` : ''}
+          ${fraisPct > 0 ? `<div style="width:${fraisPct}%; background:#B5482E; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:bold; overflow:hidden;" title="Frais">Frais</div>` : ''}
+          ${benefPct > 0 ? `<div style="width:${benefPct}%; background:#2F6E4F; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:bold; overflow:hidden;" title="Bénéfice">Bénéfice</div>` : ''}
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:11px; color:#5C6B62; margin-top:6px;">
+          <span>Investi: ${fmtPct(achatPct)}</span>
+          <span>Frais annexe: ${fmtPct(fraisPct)}</span>
+          <span style="font-weight:bold; color:${Benef>=0?'#2F6E4F':'#B5482E'}">Marge Nette: ${CA>0?fmtPct((Benef/CA)*100):'0%'}</span>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px; font-family:'Inter', sans-serif; margin-bottom:10px; border-bottom:1px solid #DBD3C0; padding-bottom:5px;">Détail des articles (${lotSales.length})</h3>
+      <table style="width:100%; border-collapse:collapse; font-size:12px;">
         <thead>
-          <tr style="background:#F6F3EC; text-align:left;">
-            <th style="padding:15px; border-bottom:1px solid #DBD3C0;">Désignation de l'article</th>
-            <th style="padding:15px; border-bottom:1px solid #DBD3C0;">Plateforme</th>
-            <th style="padding:15px; border-bottom:1px solid #DBD3C0; text-align:right;">Prix TTC</th>
+          <tr style="text-align:left; color:#5C6B62; background:#F6F3EC;">
+            <th style="padding:10px; border-bottom:1px solid #DBD3C0;">Article</th>
+            <th style="padding:10px; border-bottom:1px solid #DBD3C0;">Achat</th>
+            <th style="padding:10px; border-bottom:1px solid #DBD3C0;">Frais div.</th>
+            <th style="padding:10px; border-bottom:1px solid #DBD3C0;">Vente CA</th>
+            <th style="padding:10px; border-bottom:1px solid #DBD3C0; text-align:right;">Bénéfice</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td style="padding:15px; border-bottom:1px solid #EFEAE0;"><strong>${esc(sale.nom)}</strong><br><span style="color:#5C6B62; font-size:12px;">Catégorie : ${esc(sale.categorie)} ${sale.lot ? `(Réf: ${esc(sale.lot)})` : ''}</span></td>
-            <td style="padding:15px; border-bottom:1px solid #EFEAE0;">${esc(sale.plateforme)}</td>
-            <td style="padding:15px; border-bottom:1px solid #EFEAE0; text-align:right;">${fmt(sale.vente)}</td>
-          </tr>
-          ${sale.envoi > 0 ? `
-          <tr>
-            <td colspan="2" style="padding:15px; border-bottom:1px solid #EFEAE0; text-align:right; color:#5C6B62;">Frais de port et d'emballage</td>
-            <td style="padding:15px; border-bottom:1px solid #EFEAE0; text-align:right;">${fmt(sale.envoi)}</td>
-          </tr>` : ''}
+          ${lotSales.map(sale => {
+            const p = profit(sale);
+            return `
+            <tr>
+              <td style="padding:10px; border-bottom:1px solid #EFEAE0;"><strong>${esc(sale.nom)}</strong><br><span style="color:#5C6B62; font-size:10px;">${esc(sale.plateforme)} • Vendu le ${sale.dateVente.split('-').reverse().join('/')}</span></td>
+              <td style="padding:10px; border-bottom:1px solid #EFEAE0;">${fmt(sale.achat)}</td>
+              <td style="padding:10px; border-bottom:1px solid #EFEAE0;">${fmt(sale.envoi + sale.autres)}</td>
+              <td style="padding:10px; border-bottom:1px solid #EFEAE0; font-weight:600;">${fmt(sale.vente)}</td>
+              <td style="padding:10px; border-bottom:1px solid #EFEAE0; text-align:right; font-weight:bold; color:${p>=0?'#2F6E4F':'#B5482E'};">${fmt(p)}</td>
+            </tr>
+          `}).join('')}
         </tbody>
       </table>
-
-      <div style="display:flex; justify-content:flex-end;">
-        <div style="width:300px; background:#F6F3EC; padding:20px; border-radius:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; font-size:20px; font-weight:bold; font-family:'Fraunces', serif;">
-            <span>TOTAL À PAYER</span>
-            <span>${fmt(sale.vente + sale.envoi)}</span>
-          </div>
-          <p style="margin:10px 0 0; font-size:11px; color:#5C6B62; text-align:right;">TVA non applicable, art. 293 B du CGI.</p>
-        </div>
-      </div>
-      
-      <div style="margin-top:80px; text-align:center; font-size:12px; color:#9AA69D; border-top:1px solid #EFEAE0; padding-top:20px;">
-        Merci pour votre confiance.<br>
-        Document généré par Vinted Ledger.
-      </div>
     </div>
   `;
   document.getElementById('print-area').innerHTML = html;
   window.print();
-}
-
-window.resetData = function(){
-  if(confirm("Tout effacer ?")){ localStorage.clear(); location.reload(); }
 }
 
 /* ---------- NAVIGATION ---------- */
@@ -660,7 +758,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 });
 
 function renderAll(){
-  renderDashboard(); renderVentes(); renderStock(); renderCommandes(); renderOutils();
+  renderDashboard(); renderVentes(); renderStock(); renderCommandes(); renderFrais(); renderObjectifs(); renderOutils();
   document.querySelector(`[data-tab="${activeTab}"]`).click();
 }
 
