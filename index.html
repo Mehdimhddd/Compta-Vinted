@@ -66,11 +66,12 @@
   .stat.hero .pos{color:#8FD9AE;} .stat.hero .neg{color:#F0A98F;}
   .stats-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
 
-  /* progress */
-  .progress-track{background:var(--paper-alt);border-radius:999px;height:10px;overflow:hidden;margin:8px 0;}
-  .progress-fill{height:100%;background:var(--green);border-radius:999px;transition:width .3s ease;}
-  .progress-fill.over{background:var(--mustard);}
-  .progress-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;}
+  /* Leaderboard / Ranking */
+  .ranking-list{display:flex;flex-direction:column;gap:8px;}
+  .ranking-item{display:flex;align-items:center;padding:10px;border-radius:12px;background:var(--paper-alt);gap:12px;}
+  .rank-num{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--mustard);width:24px;text-align:center;}
+  .rank-info{flex:1;font-size:14px;}
+  .rank-profit{font-family:'Fraunces',serif;font-size:16px;font-weight:600;}
 
   /* forms */
   label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;font-weight:500;}
@@ -84,6 +85,7 @@
   .btn{border:none;border-radius:10px;padding:11px;font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;cursor:pointer;transition:opacity .15s ease;}
   .btn:hover{opacity:0.88;}
   .btn-primary{background:var(--ink);color:var(--paper);width:100%;}
+  .btn-success{background:var(--green);color:#fff;width:100%;}
   .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--ink);}
   .btn-sm{padding:7px 12px;font-size:12px;border-radius:8px;}
   .btn-danger{background:var(--rust-soft);color:var(--rust);border:1px solid var(--rust);}
@@ -91,16 +93,12 @@
 
   .section-title{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-soft);margin:22px 0 12px;display:flex;justify-content:space-between;align-items:center;}
 
-  .toolbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
-  .toolbar input, .toolbar select{flex:1;min-width:110px;}
-
   /* tag cards */
   .tag{position:relative;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 16px 14px 20px;margin-bottom:14px;}
   .tag::before{content:"";position:absolute;left:-1px;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--cat-color, var(--mustard));}
   .tag-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
   .tag-name{font-family:'Fraunces',serif;font-weight:600;font-size:16px;}
   .tag-cat{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;border-radius:999px;margin-top:4px;}
-  .tag-plat{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;border-radius:999px;margin-top:4px;background:var(--paper-alt);color:var(--ink);}
   .tag-detail{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:4px 10px;margin-bottom:10px;}
   .tag-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--border);padding-top:10px;}
   .tag-profit-label{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.06em;}
@@ -109,9 +107,9 @@
   .link-btn{background:none;border:none;color:var(--ink-soft);font-size:11.5px;cursor:pointer;text-decoration:underline;padding:0;font-family:'Inter',sans-serif;}
   .link-btn:hover{color:var(--rust);}
   .link-btn.edit:hover{color:var(--green);}
+  .link-btn.sell{color:var(--green);font-weight:600;}
 
   .empty{text-align:center;padding:34px 20px;color:var(--ink-soft);background:var(--card);border:1px dashed var(--border);border-radius:14px;font-size:13.5px;}
-  .empty strong{display:block;color:var(--ink);font-family:'Fraunces',serif;font-size:16px;margin-bottom:6px;font-weight:600;}
 
   /* toast */
   #toasts{position:fixed;bottom:16px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:60;pointer-events:none;}
@@ -147,7 +145,6 @@
     <button class="tab-btn" data-tab="ventes">🏷️ Ventes</button>
     <button class="tab-btn" data-tab="stock">📦 Stock</button>
     <button class="tab-btn" data-tab="commandes">🛒 Commandes</button>
-    <button class="tab-btn" data-tab="objectifs">🎯 Objectifs</button>
     <button class="tab-btn" data-tab="outils">🛠️ Outils</button>
   </nav>
 
@@ -155,7 +152,6 @@
   <section class="section" id="tab-ventes"></section>
   <section class="section" id="tab-stock"></section>
   <section class="section" id="tab-commandes"></section>
-  <section class="section" id="tab-objectifs"></section>
   <section class="section" id="tab-outils"></section>
 </div>
 
@@ -164,17 +160,16 @@
 const CATEGORIES = ['Vêtements femme','Vêtements homme','Enfant','Chaussures','Accessoires','Maison','Autre'];
 const PLATEFORMES = ['Vinted', 'Leboncoin', 'Depop', 'Vestiaire Co.', 'Autre'];
 const CAT_COLORS = ['#B5482E','#3B6E8F','#D9A441','#7A5C9E','#2F6E4F','#8A8F5C','#6B6B6B'];
-const MONTHS_FR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 
 /* ---------- STATE ---------- */
 let sales = [];
 let stock = [];
-let settings = { objectifMensuel: 0, theme: 'light', profil: { nom:'', adresse:'', siret:'' } };
+let settings = { theme: 'light', profil: { nom:'', adresse:'', siret:'' } };
 let loaded = false;
 let activeTab = 'dashboard';
 let editingSaleId = null;
-let sellingStockId = null;
-let ventesFilter = { search:'', categorie:'', sort:'date-desc' };
+let editingStockId = null;
+let sellingStockId = null; // ID de l'article en stock en cours de vente
 
 /* ---------- HELPERS ---------- */
 const uid = () => 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8);
@@ -183,7 +178,7 @@ const fmt = (n) => (Math.round((n||0)*100)/100).toLocaleString('fr-FR',{minimumF
 const fmtPct = (n) => (Math.round((n||0)*10)/10).toLocaleString('fr-FR') + ' %';
 const esc = (str) => { const d=document.createElement('div'); d.textContent = str==null?'':str; return d.innerHTML; };
 const catColor = (cat) => { const i = CATEGORIES.indexOf(cat); return CAT_COLORS[i>=0?i:CAT_COLORS.length-1]; };
-const profit = (s) => s.vente - s.achat - s.envoi - s.autres;
+const profit = (s) => (s.vente||0) - (s.achat||0) - (s.envoi||0) - (s.autres||0);
 const marginPct = (s) => s.vente > 0 ? (profit(s)/s.vente*100) : 0;
 const monthKey = (dateStr) => dateStr ? dateStr.slice(0,7) : null;
 
@@ -226,7 +221,10 @@ function renderDashboard(){
   const curMonthProfit = sales.filter(s=>monthKey(s.dateVente)===todayStr().slice(0,7)).reduce((a,s)=>a+profit(s),0);
   const avgMargin = sales.length ? sales.reduce((a,s)=>a+marginPct(s),0)/sales.length : 0;
   
-  el.innerHTML = `
+  // Classement Top 5
+  const topSales = [...sales].sort((a,b) => profit(b) - profit(a)).slice(0, 5);
+
+  let html = `
     <div class="stats">
       <div class="stat hero">
         <div class="stat-label">Bénéfice total</div>
@@ -239,7 +237,24 @@ function renderDashboard(){
       <div class="stat"><div class="stat-label">Chiffre d'affaires</div><div class="stat-value" style="font-size:18px;">${fmt(totalVentes)}</div></div>
       <div class="stat"><div class="stat-label">Bénéfice du mois</div><div class="stat-value" style="font-size:18px;">${fmt(curMonthProfit)}</div></div>
     </div>
+    
+    <div class="card">
+      <p class="card-title">🏆 Top 5 des ventes les plus rentables</p>
   `;
+  
+  if(topSales.length === 0){
+    html += `<div class="empty">Aucune vente enregistrée pour le moment.</div>`;
+  } else {
+    html += `<div class="ranking-list">` + topSales.map((s, i) => `
+      <div class="ranking-item">
+        <div class="rank-num">${i+1}</div>
+        <div class="rank-info"><strong>${esc(s.nom)}</strong><br><span style="font-size:11px;color:var(--ink-soft);">${esc(s.plateforme)} • Achat: ${fmt(s.achat)}</span></div>
+        <div class="rank-profit" style="color:var(--green);font-weight:bold;">+ ${fmt(profit(s))}</div>
+      </div>
+    `).join('') + `</div>`;
+  }
+  html += `</div>`;
+  el.innerHTML = html;
 }
 
 /* ---------- RENDER: VENTES ---------- */
@@ -252,12 +267,12 @@ function saleFormHtml(s, prefix = 'f'){
     <div class="form-grid">
       <div><label>Plateforme</label><select id="${prefix}-plat">${PLATEFORMES.map(p=>`<option value="${p}" ${(s.plateforme||'Vinted')===p?'selected':''}>${p}</option>`).join('')}</select></div>
       <div><label>Catégorie</label><select id="${prefix}-cat">${CATEGORIES.map(c=>`<option value="${c}" ${s.categorie===c?'selected':''}>${c}</option>`).join('')}</select></div>
-      <div><label>Prix de vente (€)</label><input type="number" step="0.01" min="0" id="${prefix}-vente" value="${s.vente||''}"></div>
       <div><label>Prix d'achat (€)</label><input type="number" step="0.01" min="0" id="${prefix}-achat" value="${s.achat||''}"></div>
+      <div><label>Prix de vente (€)</label><input type="number" step="0.01" min="0" id="${prefix}-vente" value="${s.vente||''}"></div>
       <div><label>Frais d'envoi (€)</label><input type="number" step="0.01" min="0" id="${prefix}-envoi" value="${s.envoi||''}"></div>
       <div><label>Autres frais (€)</label><input type="number" step="0.01" min="0" id="${prefix}-autres" value="${s.autres||''}"></div>
       <div><label>Date de vente</label><input type="date" id="${prefix}-datevente" value="${s.dateVente||''}"></div>
-      <div><label>Réf. Commande / Lot (Optionnel)</label><input type="text" id="${prefix}-lot" value="${esc(s.lot||'')}" placeholder="Ex : Lot Friperie #1"></div>
+      <div><label>Réf. Commande / Lot</label><input type="text" id="${prefix}-lot" value="${esc(s.lot||'')}" placeholder="Ex : Lot Friperie #1"></div>
     </div>
   `;
 }
@@ -269,14 +284,12 @@ function renderVentes(){
 
   el.innerHTML = `
     <div class="card">
-      <p class="card-title">Nouvelle vente</p>
+      <p class="card-title">Ajouter une vente directe</p>
       ${saleFormHtml(null, 'f')}
       <button class="btn btn-primary" id="addSaleBtn">Ajouter la vente</button>
     </div>
     <p class="section-title"><span>Historique (${sales.length})</span></p>
-    <div id="salesList">
-      ${list.map(s => saleCardHtml(s)).join('')}
-    </div>
+    <div id="salesList">${list.map(s => saleCardHtml(s)).join('')}</div>
   `;
   document.getElementById('addSaleBtn').addEventListener('click', onAddSale);
   bindSaleCardEvents();
@@ -311,7 +324,7 @@ function bindSaleCardEvents(){
   document.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', e=>{ editingSaleId = e.target.getAttribute('data-edit'); renderVentes(); }));
   document.querySelectorAll('[data-cancel-edit]').forEach(b => b.addEventListener('click', ()=>{ editingSaleId = null; renderVentes(); }));
   document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', e=>{
-    if(confirm('Supprimer ?')){ sales = sales.filter(s=>s.id!==e.target.getAttribute('data-del')); saveSales(); renderAll(); }
+    if(confirm('Supprimer cette vente ?')){ sales = sales.filter(s=>s.id!==e.target.getAttribute('data-del')); saveSales(); renderAll(); }
   }));
   document.querySelectorAll('[data-save-edit]').forEach(b => b.addEventListener('click', e=>{
     const s = sales.find(x=>x.id===e.target.getAttribute('data-save-edit'));
@@ -325,7 +338,7 @@ function bindSaleCardEvents(){
       s.autres = parseFloat(document.getElementById('fe-autres').value)||0;
       s.dateVente = document.getElementById('fe-datevente').value;
       s.lot = document.getElementById('fe-lot').value;
-      editingSaleId = null; saveSales(); renderAll(); showToast('Modifié avec succès');
+      editingSaleId = null; saveSales(); renderAll(); showToast('Vente modifiée');
     }
   }));
 }
@@ -344,12 +357,160 @@ function onAddSale(){
   saveSales(); renderAll(); showToast('Vente ajoutée !');
 }
 
+
+/* ---------- RENDER: STOCK ---------- */
+function stockFormHtml(s, prefix = 'stk'){
+  s = s || { nom:'', categorie:CATEGORIES[0], plateforme:'Vinted', achat:'', lot:''};
+  return `
+    <div class="form-grid full">
+      <div><label>Article (Stock)</label><input type="text" id="${prefix}-nom" value="${esc(s.nom)}" placeholder="Ex : Veste en Jean Levi's"></div>
+    </div>
+    <div class="form-grid">
+      <div><label>Plateforme prévue</label><select id="${prefix}-plat">${PLATEFORMES.map(p=>`<option value="${p}" ${(s.plateforme||'Vinted')===p?'selected':''}>${p}</option>`).join('')}</select></div>
+      <div><label>Catégorie</label><select id="${prefix}-cat">${CATEGORIES.map(c=>`<option value="${c}" ${s.categorie===c?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div><label>Prix d'achat (€)</label><input type="number" step="0.01" min="0" id="${prefix}-achat" value="${s.achat||''}"></div>
+      <div><label>Réf. Commande / Lot</label><input type="text" id="${prefix}-lot" value="${esc(s.lot||'')}" placeholder="Ex : Lot Friperie #1"></div>
+    </div>
+  `;
+}
+
+function renderStock(){
+  const el = document.getElementById('tab-stock');
+  if(!loaded) return;
+  
+  const totalInvesti = stock.reduce((a,s)=>a+(s.achat||0), 0);
+
+  el.innerHTML = `
+    <div class="card">
+      <p class="card-title">Ajouter un article en stock</p>
+      ${stockFormHtml(null, 'stk')}
+      <button class="btn btn-primary" id="addStockBtn">Ajouter au stock</button>
+    </div>
+    
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <p class="section-title"><span>Mon Stock Actuel (${stock.length})</span></p>
+      <span style="font-size:12px; font-weight:600; color:var(--ink);">Valeur investie : ${fmt(totalInvesti)}</span>
+    </div>
+    
+    <div id="stockList">
+      ${stock.length === 0 ? `<div class="empty">Ton stock est vide.</div>` : stock.map(s => stockCardHtml(s)).join('')}
+    </div>
+  `;
+  document.getElementById('addStockBtn').addEventListener('click', onAddStock);
+  bindStockCardEvents();
+}
+
+function stockCardHtml(s){
+  // Formulaire d'édition
+  if(editingStockId === s.id){
+    return `<div class="tag">
+      ${stockFormHtml(s, 'estk')}
+      <div class="btn-row"><button class="btn btn-primary btn-sm" data-save-stock="${s.id}">Enregistrer</button><button class="btn btn-ghost btn-sm" data-cancel-stock="1">Annuler</button></div>
+    </div>`;
+  }
+  
+  // Formulaire pour "Vendre" l'article depuis le stock
+  if(sellingStockId === s.id){
+    return `<div class="tag" style="border: 2px solid var(--green);">
+      <p style="font-family:'Fraunces',serif; font-size:15px; margin:0 0 10px; color:var(--green);">💰 Vendre : ${esc(s.nom)}</p>
+      <div class="form-grid">
+        <div><label>Prix de vente final (€)</label><input type="number" step="0.01" min="0" id="sell-vente" placeholder="0.00"></div>
+        <div><label>Frais d'envoi (€)</label><input type="number" step="0.01" min="0" id="sell-envoi" value="0"></div>
+        <div><label>Autres frais (€)</label><input type="number" step="0.01" min="0" id="sell-autres" value="0"></div>
+        <div><label>Date de vente</label><input type="date" id="sell-date" value="${todayStr()}"></div>
+      </div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn btn-success btn-sm" data-confirm-sell="${s.id}">Valider la vente</button>
+        <button class="btn btn-ghost btn-sm" data-cancel-sell="1">Annuler</button>
+      </div>
+    </div>`;
+  }
+
+  return `
+    <div class="tag" style="--cat-color:${catColor(s.categorie)}">
+      <div class="tag-top">
+        <div><div class="tag-name">${esc(s.nom)}</div><span class="tag-cat" style="color:${catColor(s.categorie)};">${esc(s.categorie)}</span></div>
+      </div>
+      <div class="tag-detail">Acheté : ${fmt(s.achat)} ${s.lot ? `· 📦 <strong>${esc(s.lot)}</strong>` : ''}</div>
+      <div class="tag-bottom">
+        <div><span style="font-size:11px; color:var(--ink-soft);">${esc(s.plateforme)}</span></div>
+        <div class="tag-actions">
+          <button class="link-btn sell" data-sell="${s.id}">💰 Vendre</button>
+          <button class="link-btn edit" data-edit-stock="${s.id}">Modifier</button>
+          <button class="link-btn" data-del-stock="${s.id}">Supprimer</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function bindStockCardEvents(){
+  // Edit
+  document.querySelectorAll('[data-edit-stock]').forEach(b => b.addEventListener('click', e=>{ editingStockId = e.target.getAttribute('data-edit-stock'); sellingStockId = null; renderStock(); }));
+  document.querySelectorAll('[data-cancel-stock]').forEach(b => b.addEventListener('click', ()=>{ editingStockId = null; renderStock(); }));
+  document.querySelectorAll('[data-save-stock]').forEach(b => b.addEventListener('click', e=>{
+    const s = stock.find(x=>x.id===e.target.getAttribute('data-save-stock'));
+    if(s){
+      s.nom = document.getElementById('estk-nom').value;
+      s.plateforme = document.getElementById('estk-plat').value;
+      s.categorie = document.getElementById('estk-cat').value;
+      s.achat = parseFloat(document.getElementById('estk-achat').value)||0;
+      s.lot = document.getElementById('estk-lot').value;
+      editingStockId = null; saveStock(); renderAll(); showToast('Stock modifié');
+    }
+  }));
+  // Delete
+  document.querySelectorAll('[data-del-stock]').forEach(b => b.addEventListener('click', e=>{
+    if(confirm('Supprimer cet article du stock ?')){ stock = stock.filter(s=>s.id!==e.target.getAttribute('data-del-stock')); saveStock(); renderAll(); }
+  }));
+  
+  // Sell
+  document.querySelectorAll('[data-sell]').forEach(b => b.addEventListener('click', e=>{ sellingStockId = e.target.getAttribute('data-sell'); editingStockId = null; renderStock(); }));
+  document.querySelectorAll('[data-cancel-sell]').forEach(b => b.addEventListener('click', ()=>{ sellingStockId = null; renderStock(); }));
+  document.querySelectorAll('[data-confirm-sell]').forEach(b => b.addEventListener('click', e=>{
+    const id = e.target.getAttribute('data-confirm-sell');
+    const s = stock.find(x=>x.id===id);
+    const vente = parseFloat(document.getElementById('sell-vente').value)||0;
+    
+    if(!vente) return alert("Veuillez indiquer un prix de vente !");
+    
+    // Transfert vers les ventes
+    sales.push({
+      id: uid(), nom: s.nom, plateforme: s.plateforme, categorie: s.categorie,
+      achat: s.achat, vente: vente,
+      envoi: parseFloat(document.getElementById('sell-envoi').value)||0, 
+      autres: parseFloat(document.getElementById('sell-autres').value)||0,
+      dateVente: document.getElementById('sell-date').value || todayStr(),
+      lot: s.lot
+    });
+    
+    // Suppression du stock
+    stock = stock.filter(x => x.id !== id);
+    sellingStockId = null;
+    
+    saveSales(); saveStock(); 
+    activeTab = 'ventes'; // Rediriger vers l'onglet ventes pour voir le résultat
+    renderAll(); 
+    showToast('Félicitations pour cette vente ! 🎉');
+  }));
+}
+
+function onAddStock(){
+  const nom = document.getElementById('stk-nom').value.trim();
+  const achat = parseFloat(document.getElementById('stk-achat').value)||0;
+  if(!nom) return alert("Le nom de l'article est obligatoire.");
+  stock.push({
+    id: uid(), nom, plateforme: document.getElementById('stk-plat').value, categorie: document.getElementById('stk-cat').value,
+    achat, lot: document.getElementById('stk-lot').value.trim()
+  });
+  saveStock(); renderAll(); showToast('Ajouté au stock !');
+}
+
+
 /* ---------- RENDER: COMMANDES / LOTS ---------- */
 function renderCommandes(){
   const el = document.getElementById('tab-commandes');
   if(!loaded) return;
   
-  // Regrouper les ventes par Lot
   const lotsMap = {};
   sales.forEach(s => {
     if(!s.lot) return;
@@ -365,7 +526,7 @@ function renderCommandes(){
   el.innerHTML = `
     <div class="card">
       <p class="card-title">Bénéfices par Commandes / Lots</p>
-      <p style="font-size:13px;color:var(--ink-soft);margin:-10px 0 15px;">Assigne un "Lot / Réf. Commande" à tes ventes pour analyser la rentabilité d'un achat groupé (ex: Commande Kilo Shop, Lot de 10 t-shirts...).</p>
+      <p style="font-size:13px;color:var(--ink-soft);margin:-10px 0 15px;">Assigne un "Lot / Réf. Commande" à tes ventes ou à ton stock pour analyser la rentabilité d'un achat groupé.</p>
       
       ${lotsArray.length === 0 ? `<div class="empty">Aucune commande enregistrée.</div>` : 
       lotsArray.map(lot => {
@@ -391,10 +552,6 @@ function renderCommandes(){
     </div>
   `;
 }
-
-/* ---------- RENDER: STOCK & OBJECTIFS (Simplifiés pour l'exemple global) ---------- */
-function renderStock(){ document.getElementById('tab-stock').innerHTML = '<div class="card"><p class="card-title">Stock</p><p style="font-size:13px;color:var(--ink-soft);">Gère tes articles non vendus ici. Identique au fonctionnement précédent, avec l\'ajout du champ Lot.</p></div>'; }
-function renderObjectifs(){ document.getElementById('tab-objectifs').innerHTML = '<div class="card"><p class="card-title">Objectifs</p><p style="font-size:13px;color:var(--ink-soft);">Fixe tes objectifs de bénéfice mensuel.</p></div>'; }
 
 /* ---------- RENDER: OUTILS & FACTURATION ---------- */
 function renderOutils(){
@@ -503,7 +660,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 });
 
 function renderAll(){
-  renderDashboard(); renderVentes(); renderStock(); renderCommandes(); renderObjectifs(); renderOutils();
+  renderDashboard(); renderVentes(); renderStock(); renderCommandes(); renderOutils();
   document.querySelector(`[data-tab="${activeTab}"]`).click();
 }
 
