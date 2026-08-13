@@ -175,7 +175,7 @@ const MONTHS_FR = ['Jan','Fév','Mar','Avr','Mai','Jui','Jul','Aoû','Sep','Oct'
 let sales = [];
 let stock = [];
 let expenses = [];
-let settings = { theme: 'light', objectifMensuel: 200, profil: { nom:'', adresse:'', siret:'' } };
+let settings = { theme: 'light', objectifMensuel: 200, lotSplits: {} };
 let loaded = false;
 let activeTab = 'dashboard';
 let editingSaleId = null;
@@ -191,26 +191,34 @@ const fmtPct = (n) => (Math.round((n||0)*10)/10).toLocaleString('fr-FR') + ' %';
 const esc = (str) => { const d=document.createElement('div'); d.textContent = str==null?'':str; return d.innerHTML; };
 const catColor = (cat) => { const i = CATEGORIES.indexOf(cat); return CAT_COLORS[i>=0?i:CAT_COLORS.length-1]; };
 const profit = (s) => (s.vente||0) - (s.achat||0) - (s.envoi||0) - (s.autres||0);
-const marginPct = (s) => s.vente > 0 ? (profit(s)/s.vente*100) : 0;
 const monthKey = (dateStr) => dateStr ? dateStr.slice(0,7) : null;
+
+// Gérer la part (pourcentage) de l'utilisateur sur un lot
+const getShare = (lotName) => {
+  if(!lotName || !settings.lotSplits) return 1;
+  const pct = settings.lotSplits[lotName];
+  return pct !== undefined ? (pct / 100) : 1;
+};
+const myProfit = (s) => profit(s) * getShare(s.lot);
+const myVente = (s) => (s.vente||0) * getShare(s.lot);
 
 /* ---------- PERSISTENCE ---------- */
 function loadAll(){
-  try{ const r = localStorage.getItem('vinted-settings-v3'); if(r) settings = Object.assign(settings, JSON.parse(r)); } catch(e){}
-  try{ const r = localStorage.getItem('vinted-sales-v3'); if(r) sales = JSON.parse(r); } catch(e){}
-  try{ const r = localStorage.getItem('vinted-stock-v3'); if(r) stock = JSON.parse(r); } catch(e){}
-  try{ const r = localStorage.getItem('vinted-expenses-v3'); if(r) expenses = JSON.parse(r); } catch(e){}
+  try{ const r = localStorage.getItem('vinted-settings-v4'); if(r) settings = Object.assign(settings, JSON.parse(r)); } catch(e){}
+  try{ const r = localStorage.getItem('vinted-sales-v4'); if(r) sales = JSON.parse(r); } catch(e){}
+  try{ const r = localStorage.getItem('vinted-stock-v4'); if(r) stock = JSON.parse(r); } catch(e){}
+  try{ const r = localStorage.getItem('vinted-expenses-v4'); if(r) expenses = JSON.parse(r); } catch(e){}
   
-  if(!settings.profil) settings.profil = { nom:'', adresse:'', siret:'' };
+  if(!settings.lotSplits) settings.lotSplits = {};
   if(!settings.objectifMensuel) settings.objectifMensuel = 200;
   
   loaded = true;
   applyTheme(); renderAll();
 }
-function saveSales(){ localStorage.setItem('vinted-sales-v3', JSON.stringify(sales)); }
-function saveStock(){ localStorage.setItem('vinted-stock-v3', JSON.stringify(stock)); }
-function saveExpenses(){ localStorage.setItem('vinted-expenses-v3', JSON.stringify(expenses)); }
-function saveSettings(){ localStorage.setItem('vinted-settings-v3', JSON.stringify(settings)); }
+function saveSales(){ localStorage.setItem('vinted-sales-v4', JSON.stringify(sales)); }
+function saveStock(){ localStorage.setItem('vinted-stock-v4', JSON.stringify(stock)); }
+function saveExpenses(){ localStorage.setItem('vinted-expenses-v4', JSON.stringify(expenses)); }
+function saveSettings(){ localStorage.setItem('vinted-settings-v4', JSON.stringify(settings)); }
 
 /* ---------- THEME & TOAST ---------- */
 function applyTheme(){
@@ -234,20 +242,28 @@ function renderDashboard(){
   const el = document.getElementById('tab-dashboard');
   if(!loaded) return;
   
-  const totalVentes = sales.reduce((a,s)=>a+s.vente,0);
-  const rawProfit = sales.reduce((a,s)=>a+profit(s),0);
+  // Totaux ajustés selon MA PART
+  const totalVentes = sales.reduce((a,s)=>a+myVente(s),0);
+  const rawProfit = sales.reduce((a,s)=>a+myProfit(s),0);
   const totalExpenses = expenses.reduce((a,e)=>a+e.montant,0);
   const netProfit = rawProfit - totalExpenses; 
   
-  const avgMargin = sales.length ? sales.reduce((a,s)=>a+marginPct(s),0)/sales.length : 0;
-  const topSales = [...sales].sort((a,b) => profit(b) - profit(a)).slice(0, 5);
+  // Marge moyenne basée sur la part
+  let totalMargin = 0; let marginCount = 0;
+  sales.forEach(s => { 
+    if(myVente(s) > 0) { totalMargin += (myProfit(s) / myVente(s) * 100); marginCount++; }
+  });
+  const avgMargin = marginCount ? totalMargin / marginCount : 0;
+  
+  // Top 5 basé sur MA PART de bénéfice
+  const topSales = [...sales].sort((a,b) => myProfit(b) - myProfit(a)).slice(0, 5);
 
   let chartData = [];
   let maxChartProfit = 1;
   for(let i=5; i>=0; i--){
     let d = new Date(); d.setMonth(d.getMonth() - i);
     let mk = d.toISOString().slice(0,7);
-    let mProf = sales.filter(s=>monthKey(s.dateVente)===mk).reduce((a,s)=>a+profit(s),0) - expenses.filter(e=>monthKey(e.dateFrais)===mk).reduce((a,e)=>a+e.montant,0);
+    let mProf = sales.filter(s=>monthKey(s.dateVente)===mk).reduce((a,s)=>a+myProfit(s),0) - expenses.filter(e=>monthKey(e.dateFrais)===mk).reduce((a,e)=>a+e.montant,0);
     chartData.push({ label: MONTHS_FR[d.getMonth()], profit: mProf });
     if(Math.abs(mProf) > maxChartProfit) maxChartProfit = Math.abs(mProf);
   }
@@ -255,7 +271,7 @@ function renderDashboard(){
   let html = `
     <div class="stats">
       <div class="stat hero">
-        <div class="stat-label">Bénéfice Net</div>
+        <div class="stat-label">Bénéfice Net (Ma Part)</div>
         <div class="stat-value ${netProfit>=0?'pos':'neg'}">${fmt(netProfit)}</div>
       </div>
       <div class="stat"><div class="stat-label">Ventes</div><div class="stat-value">${sales.length}</div></div>
@@ -278,15 +294,15 @@ function renderDashboard(){
     </div>
     
     <div class="card">
-      <p class="card-title">🏆 Top 5 des ventes</p>
+      <p class="card-title">🏆 Top 5 des ventes (Ma part)</p>
   `;
   
   if(topSales.length === 0) html += `<div class="empty">Aucune vente enregistrée.</div>`;
   else html += `<div class="ranking-list">` + topSales.map((s, i) => `
       <div class="ranking-item">
         <div class="rank-num">${i+1}</div>
-        <div class="rank-info"><strong>${esc(s.nom)}</strong><br><span style="font-size:11px;color:var(--ink-soft);">${esc(s.plateforme)} • Achat: ${fmt(s.achat)}</span></div>
-        <div class="rank-profit" style="color:var(--green);font-weight:bold;">+ ${fmt(profit(s))}</div>
+        <div class="rank-info"><strong>${esc(s.nom)}</strong><br><span style="font-size:11px;color:var(--ink-soft);">${esc(s.plateforme)} • Achat total: ${fmt(s.achat)}</span></div>
+        <div class="rank-profit" style="color:var(--green);font-weight:bold;">+ ${fmt(myProfit(s))}</div>
       </div>
     `).join('') + `</div>`;
     
@@ -304,10 +320,10 @@ function saleFormHtml(s, prefix = 'f'){
     <div class="form-grid">
       <div><label>Plateforme</label><select id="${prefix}-plat">${PLATEFORMES.map(p=>`<option value="${p}" ${(s.plateforme||'Vinted')===p?'selected':''}>${p}</option>`).join('')}</select></div>
       <div><label>Catégorie</label><select id="${prefix}-cat">${CATEGORIES.map(c=>`<option value="${c}" ${s.categorie===c?'selected':''}>${c}</option>`).join('')}</select></div>
-      <div><label>Prix d'achat (€)</label><input type="number" step="0.01" min="0" id="${prefix}-achat" value="${s.achat||''}"></div>
-      <div><label>Prix de vente (€)</label><input type="number" step="0.01" min="0" id="${prefix}-vente" value="${s.vente||''}"></div>
-      <div><label>Frais d'envoi (€)</label><input type="number" step="0.01" min="0" id="${prefix}-envoi" value="${s.envoi||''}"></div>
-      <div><label>Autres frais (€)</label><input type="number" step="0.01" min="0" id="${prefix}-autres" value="${s.autres||''}"></div>
+      <div><label>Prix d'achat global (€)</label><input type="number" step="0.01" min="0" id="${prefix}-achat" value="${s.achat||''}"></div>
+      <div><label>Prix de vente global (€)</label><input type="number" step="0.01" min="0" id="${prefix}-vente" value="${s.vente||''}"></div>
+      <div><label>Frais d'envoi globaux (€)</label><input type="number" step="0.01" min="0" id="${prefix}-envoi" value="${s.envoi||''}"></div>
+      <div><label>Autres frais globaux (€)</label><input type="number" step="0.01" min="0" id="${prefix}-autres" value="${s.autres||''}"></div>
       <div><label>Date de vente</label><input type="date" id="${prefix}-datevente" value="${s.dateVente||''}"></div>
       <div><label>Réf. Archive / Lot</label><input type="text" id="${prefix}-lot" value="${esc(s.lot||'')}" placeholder="Ex : Lot Friperie #1"></div>
     </div>
@@ -346,6 +362,8 @@ function saleCardHtml(s){
     </div>`;
   }
   const p = profit(s);
+  const myP = myProfit(s);
+  const isSplit = getShare(s.lot) < 1;
   return `
     <div class="tag" style="--cat-color:${catColor(s.categorie)}">
       <div class="tag-top">
@@ -353,7 +371,11 @@ function saleCardHtml(s){
       </div>
       <div class="tag-detail">Achat ${fmt(s.achat)} · Vente ${fmt(s.vente)} ${s.lot ? `· 🗂️ <strong>${esc(s.lot)}</strong>` : ''}</div>
       <div class="tag-bottom">
-        <div><div class="tag-profit-label">Bénéfice</div><div class="tag-profit-value" style="color:${p>=0?'var(--green)':'var(--rust)'}">${fmt(p)}</div></div>
+        <div>
+          <div class="tag-profit-label">Bénéfice ${isSplit ? '(Global)' : ''}</div>
+          <div class="tag-profit-value" style="color:${p>=0?'var(--green)':'var(--rust)'}">${fmt(p)}</div>
+          ${isSplit ? `<div style="font-size:10px; color:var(--ink-soft); font-weight:600; margin-top:2px;">Ma part: ${fmt(myP)}</div>` : ''}
+        </div>
         <div class="tag-actions">
           <button class="link-btn edit" data-edit="${s.id}">Modifier</button>
           <button class="link-btn" data-del="${s.id}">Supprimer</button>
@@ -401,7 +423,7 @@ function stockFormHtml(s, prefix = 'stk'){
     <div class="form-grid">
       <div><label>Plateforme prévue</label><select id="${prefix}-plat">${PLATEFORMES.map(p=>`<option value="${p}" ${(s.plateforme||'Vinted')===p?'selected':''}>${p}</option>`).join('')}</select></div>
       <div><label>Catégorie</label><select id="${prefix}-cat">${CATEGORIES.map(c=>`<option value="${c}" ${s.categorie===c?'selected':''}>${c}</option>`).join('')}</select></div>
-      <div><label>Prix d'achat (€)</label><input type="number" step="0.01" min="0" id="${prefix}-achat" value="${s.achat||''}"></div>
+      <div><label>Prix d'achat global (€)</label><input type="number" step="0.01" min="0" id="${prefix}-achat" value="${s.achat||''}"></div>
       <div><label>Réf. Archive / Lot</label><input type="text" id="${prefix}-lot" value="${esc(s.lot||'')}" placeholder="Ex : Lot Friperie #1"></div>
     </div>
   `;
@@ -410,12 +432,12 @@ function stockFormHtml(s, prefix = 'stk'){
 function renderStock(){
   const el = document.getElementById('tab-stock');
   if(!loaded) return;
-  const totalInvesti = stock.reduce((a,s)=>a+(s.achat||0), 0);
+  const totalInvesti = stock.reduce((a,s)=>a+(s.achat||0)*getShare(s.lot), 0);
   el.innerHTML = `
     <div class="card"><p class="card-title">Ajouter un article en stock</p>${stockFormHtml(null, 'stk')}<button class="btn btn-primary" id="addStockBtn">Ajouter au stock</button></div>
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <p class="section-title"><span>Mon Stock Actuel (${stock.length})</span></p>
-      <span style="font-size:12px; font-weight:600; color:var(--ink);">Valeur investie : ${fmt(totalInvesti)}</span>
+      <span style="font-size:12px; font-weight:600; color:var(--ink);">Valeur investie (Ma part): ${fmt(totalInvesti)}</span>
     </div>
     <div id="stockList">${stock.length === 0 ? `<div class="empty">Ton stock est vide.</div>` : stock.map(s => stockCardHtml(s)).join('')}</div>
   `;
@@ -431,9 +453,9 @@ function stockCardHtml(s){
     return `<div class="tag" style="border: 2px solid var(--green);">
       <p style="font-family:'Fraunces',serif; font-size:15px; margin:0 0 10px; color:var(--green);">💰 Vendre : ${esc(s.nom)}</p>
       <div class="form-grid">
-        <div><label>Prix de vente final (€)</label><input type="number" step="0.01" min="0" id="sell-vente" placeholder="0.00"></div>
-        <div><label>Frais d'envoi (€)</label><input type="number" step="0.01" min="0" id="sell-envoi" value="0"></div>
-        <div><label>Autres frais (€)</label><input type="number" step="0.01" min="0" id="sell-autres" value="0"></div>
+        <div><label>Prix de vente global (€)</label><input type="number" step="0.01" min="0" id="sell-vente" placeholder="0.00"></div>
+        <div><label>Frais d'envoi globaux (€)</label><input type="number" step="0.01" min="0" id="sell-envoi" value="0"></div>
+        <div><label>Autres frais globaux (€)</label><input type="number" step="0.01" min="0" id="sell-autres" value="0"></div>
         <div><label>Date de vente</label><input type="date" id="sell-date" value="${todayStr()}"></div>
       </div>
       <div class="btn-row" style="margin-top:10px;"><button class="btn btn-success btn-sm" data-confirm-sell="${s.id}">Valider la vente</button><button class="btn btn-ghost btn-sm" data-cancel-sell="1">Annuler</button></div>
@@ -442,7 +464,7 @@ function stockCardHtml(s){
   return `
     <div class="tag" style="--cat-color:${catColor(s.categorie)}">
       <div class="tag-top"><div><div class="tag-name">${esc(s.nom)}</div><span class="tag-cat" style="color:${catColor(s.categorie)};">${esc(s.categorie)}</span></div></div>
-      <div class="tag-detail">Acheté : ${fmt(s.achat)} ${s.lot ? `· 🗂️ <strong>${esc(s.lot)}</strong>` : ''}</div>
+      <div class="tag-detail">Achat global : ${fmt(s.achat)} ${s.lot ? `· 🗂️ <strong>${esc(s.lot)}</strong>` : ''}</div>
       <div class="tag-bottom">
         <div><span style="font-size:11px; color:var(--ink-soft);">${esc(s.plateforme)}</span></div>
         <div class="tag-actions">
@@ -492,6 +514,23 @@ function onAddStock(){
 }
 
 /* ---------- RENDER: COMMANDES / ARCHIVES ---------- */
+window.promptShare = function(lotName) {
+  let currentPct = (settings.lotSplits && settings.lotSplits[lotName] !== undefined) ? settings.lotSplits[lotName] : 100;
+  let pct = prompt(`S'il s'agit d'un achat partagé, quel est TON pourcentage sur le lot "${lotName}" ? (ex: 50 pour 50/50)`, currentPct);
+  if (pct !== null) {
+    let val = parseFloat(pct);
+    if (!isNaN(val) && val >= 0 && val <= 100) {
+      if (!settings.lotSplits) settings.lotSplits = {};
+      settings.lotSplits[lotName] = val;
+      saveSettings();
+      renderAll();
+      showToast('Partage mis à jour');
+    } else {
+      alert("Veuillez entrer un nombre valide entre 0 et 100.");
+    }
+  }
+}
+
 function renderCommandes(){
   const el = document.getElementById('tab-commandes');
   if(!loaded) return;
@@ -509,11 +548,15 @@ function renderCommandes(){
   el.innerHTML = `
     <div class="card">
       <p class="card-title">Archives de Rentabilité / Lots</p>
-      <p style="font-size:13px;color:var(--ink-soft);margin:-10px 0 15px;">Les articles ayant la même référence de "Réf. Archive / Lot" sont regroupés ici. Imprime une fiche interne pour analyser ta rentabilité !</p>
+      <p style="font-size:13px;color:var(--ink-soft);margin:-10px 0 15px;">Les articles ayant la même référence "Archive/Lot" sont regroupés ici. Imprime une fiche ou définis ta part en cas d'achat groupé.</p>
       
       ${lotsArray.length === 0 ? `<div class="empty">Aucune archive enregistrée. Ajoute un nom de lot à tes ventes.</div>` : 
       lotsArray.map(lot => {
-        const benef = lot.totalVente - lot.totalAchat - lot.totalFrais;
+        const benefGlobal = lot.totalVente - lot.totalAchat - lot.totalFrais;
+        const pct = (settings.lotSplits && settings.lotSplits[lot.nom] !== undefined) ? settings.lotSplits[lot.nom] : 100;
+        const isShared = pct < 100;
+        const myBenef = benefGlobal * (pct / 100);
+
         return `
         <div style="border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px; background:var(--card);">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
@@ -521,7 +564,10 @@ function renderCommandes(){
               <strong style="font-family:'Fraunces',serif; font-size:16px;">🗂️ ${esc(lot.nom)}</strong>
               <div style="font-size:11px; color:var(--ink-soft); margin-top:4px;">${lot.ventes.length} article(s) • ${lot.dateRecent.split('-').reverse().join('/')}</div>
             </div>
-            <button class="btn btn-sm btn-ghost" onclick="printArchiveLot('${esc(lot.nom.replace(/'/g, "\\'"))}')">📊 Fiche PDF</button>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-sm btn-ghost" onclick="promptShare('${esc(lot.nom.replace(/'/g, "\\'"))}')">🤝 Partage ${isShared?`(${pct}%)`:''}</button>
+              <button class="btn btn-sm btn-primary" onclick="printArchiveLot('${esc(lot.nom.replace(/'/g, "\\'"))}')">📊 PDF</button>
+            </div>
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px; color:var(--ink-soft); margin-bottom:12px; background:var(--paper); padding:8px; border-radius:8px;">
             <div>CA Total: <strong>${fmt(lot.totalVente)}</strong></div>
@@ -529,8 +575,11 @@ function renderCommandes(){
             <div style="grid-column: span 2;">Frais & Envois: <strong>${fmt(lot.totalFrais)}</strong></div>
           </div>
           <div style="border-top:1px dashed var(--border); padding-top:10px; display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft);">Bénéfice Net</span>
-            <strong style="font-family:'Fraunces',serif; font-size:18px; color:${benef>=0?'var(--green)':'var(--rust)'}">${fmt(benef)}</strong>
+            <div style="display:flex; flex-direction:column;">
+              <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft);">Bénéfice Global</span>
+              ${isShared ? `<span style="font-size:11px; font-weight:600; color:var(--ink); margin-top:2px;">↳ Ta part (${pct}%) : <span style="color:${myBenef>=0?'var(--green)':'var(--rust)'}">${fmt(myBenef)}</span></span>` : ''}
+            </div>
+            <strong style="font-family:'Fraunces',serif; font-size:18px; color:${benefGlobal>=0?'var(--green)':'var(--rust)'}">${fmt(benefGlobal)}</strong>
           </div>
         </div>
         `;
@@ -545,7 +594,7 @@ function renderFrais(){
   if(!loaded) return;
   el.innerHTML = `
     <div class="card">
-      <p class="card-title">Ajouter une dépense annexe</p>
+      <p class="card-title">Ajouter une dépense annexe (Perso)</p>
       <div class="form-grid full"><div><label>Description</label><input type="text" id="fr-nom" placeholder="Ex: Achat de cartons"></div></div>
       <div class="form-grid"><div><label>Montant (€)</label><input type="number" step="0.01" min="0" id="fr-montant"></div><div><label>Date</label><input type="date" id="fr-date" value="${todayStr()}"></div></div>
       <button class="btn btn-primary" id="addFraisBtn">Ajouter la dépense</button>
@@ -572,14 +621,15 @@ function renderObjectifs(){
   const el = document.getElementById('tab-objectifs');
   if(!loaded) return;
   const curMonthKey = todayStr().slice(0,7);
-  const curMonthProfit = sales.filter(s=>monthKey(s.dateVente)===curMonthKey).reduce((a,s)=>a+profit(s),0) - expenses.filter(e=>monthKey(e.dateFrais)===curMonthKey).reduce((a,e)=>a+e.montant,0);
+  // Basé sur TA PART des bénéfices
+  const curMonthProfit = sales.filter(s=>monthKey(s.dateVente)===curMonthKey).reduce((a,s)=>a+myProfit(s),0) - expenses.filter(e=>monthKey(e.dateFrais)===curMonthKey).reduce((a,e)=>a+e.montant,0);
   const goal = settings.objectifMensuel || 1; 
   let progress = Math.max(0, (curMonthProfit / goal) * 100);
   const isOver = progress >= 100;
   
   el.innerHTML = `
     <div class="card">
-      <p class="card-title">Objectif du mois en cours</p>
+      <p class="card-title">Objectif personnel du mois</p>
       <div style="margin:20px 0;">
         <div style="font-family:'Fraunces', serif; font-size:32px; font-weight:600; text-align:center; color:${isOver?'var(--green)':'var(--ink)'}">${fmt(curMonthProfit)} <span style="font-size:18px; color:var(--ink-soft)">/ ${fmt(goal)}</span></div>
         <div class="progress-track"><div class="progress-fill ${isOver?'over':''}" style="width:${Math.min(progress, 100)}%;"></div></div>
@@ -666,45 +716,53 @@ window.printArchiveLot = function(lotName){
   const lotSales = sales.filter(s => s.lot === lotName);
   if(!lotSales.length) return;
   
-  const recentDate = lotSales.reduce((max, s) => s.dateVente > max ? s.dateVente : max, lotSales[0].dateVente);
-  
+  const pct = (settings.lotSplits && settings.lotSplits[lotName] !== undefined) ? settings.lotSplits[lotName] : 100;
+  const isShared = pct < 100;
+
   const CA = lotSales.reduce((acc, s) => acc + s.vente, 0);
   const Achats = lotSales.reduce((acc, s) => acc + s.achat, 0);
   const Frais = lotSales.reduce((acc, s) => acc + (s.envoi + s.autres), 0);
   const Benef = CA - Achats - Frais;
   
-  // Calculs pour la barre de répartition (limité entre 0 et 100%)
+  // Calculs pour la barre de répartition
   const achatPct = CA > 0 ? Math.max(0, Math.min(100, (Achats / CA) * 100)) : 0;
   const fraisPct = CA > 0 ? Math.max(0, Math.min(100, (Frais / CA) * 100)) : 0;
-  // Si le bénéfice est négatif, on ne l'affiche pas dans la barre
   const benefPct = CA > 0 && Benef > 0 ? Math.max(0, Math.min(100, (Benef / CA) * 100)) : 0;
 
   const html = `
     <div style="max-width:800px; margin:0 auto; color:#1E2A23;">
-      <div style="border-bottom:3px solid #1E2A23; padding-bottom:20px; margin-bottom:30px;">
-        <h1 style="margin:0; font-size:28px; font-family:'Fraunces', serif; letter-spacing:-0.02em;">FICHE DE RENTABILITÉ</h1>
-        <p style="margin:8px 0 0; color:#5C6B62; font-size:16px;">Lot / Réf : <strong>${esc(lotName)}</strong></p>
-        <p style="margin:4px 0 0; color:#5C6B62; font-size:13px;">Date d'édition : ${todayStr().split('-').reverse().join('/')}</p>
+      <div style="border-bottom:3px solid #1E2A23; padding-bottom:20px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:flex-end;">
+        <div>
+          <h1 style="margin:0; font-size:28px; font-family:'Fraunces', serif; letter-spacing:-0.02em;">FICHE DE RENTABILITÉ</h1>
+          <p style="margin:8px 0 0; color:#5C6B62; font-size:16px;">Lot / Réf : <strong>${esc(lotName)}</strong></p>
+          <p style="margin:4px 0 0; color:#5C6B62; font-size:13px;">Date d'édition : ${todayStr().split('-').reverse().join('/')}</p>
+        </div>
+        ${isShared ? `
+        <div style="background:#F4E3DD; border:1px solid #B5482E; border-radius:8px; padding:10px 15px; text-align:right;">
+          <div style="font-size:11px; text-transform:uppercase; color:#B5482E; font-weight:600;">Lot Partagé</div>
+          <div style="font-size:16px; font-family:'Fraunces',serif; font-weight:bold; color:#B5482E;">Ta part : ${pct}%</div>
+        </div>
+        ` : ''}
       </div>
 
       <div style="display:flex; justify-content:space-between; gap:15px; margin-bottom:25px;">
         <div style="flex:1; background:#F6F3EC; padding:15px; border-radius:12px; border:1px solid #DBD3C0;">
-          <div style="font-size:11px; text-transform:uppercase; color:#5C6B62; letter-spacing:0.05em; margin-bottom:5px;">Chiffre d'Affaires</div>
+          <div style="font-size:11px; text-transform:uppercase; color:#5C6B62; letter-spacing:0.05em; margin-bottom:5px;">CA (Global)</div>
           <div style="font-size:22px; font-weight:bold; font-family:'Fraunces',serif;">${fmt(CA)}</div>
         </div>
         <div style="flex:1; background:#F6F3EC; padding:15px; border-radius:12px; border:1px solid #DBD3C0;">
-          <div style="font-size:11px; text-transform:uppercase; color:#5C6B62; letter-spacing:0.05em; margin-bottom:5px;">Coûts & Frais</div>
+          <div style="font-size:11px; text-transform:uppercase; color:#5C6B62; letter-spacing:0.05em; margin-bottom:5px;">Coûts & Frais (Global)</div>
           <div style="font-size:22px; font-weight:bold; font-family:'Fraunces',serif; color:#B5482E;">${fmt(Achats + Frais)}</div>
         </div>
         <div style="flex:1; background:${Benef>=0?'#E4EFE8':'#F4E3DD'}; padding:15px; border-radius:12px; border:1px solid ${Benef>=0?'#8FD9AE':'#F0A98F'};">
-          <div style="font-size:11px; text-transform:uppercase; color:${Benef>=0?'#2F6E4F':'#B5482E'}; letter-spacing:0.05em; margin-bottom:5px;">Bénéfice Net</div>
+          <div style="font-size:11px; text-transform:uppercase; color:${Benef>=0?'#2F6E4F':'#B5482E'}; letter-spacing:0.05em; margin-bottom:5px;">Bénéfice Net (Global)</div>
           <div style="font-size:22px; font-weight:bold; font-family:'Fraunces',serif; color:${Benef>=0?'#2F6E4F':'#B5482E'};">${fmt(Benef)}</div>
+          ${isShared ? `<div style="font-size:12px; margin-top:4px; font-weight:600; color:${Benef>=0?'#2F6E4F':'#B5482E'}; border-top:1px dashed ${Benef>=0?'#8FD9AE':'#F0A98F'}; padding-top:4px;">↳ Ta part: ${fmt(Benef * (pct/100))}</div>` : ''}
         </div>
       </div>
 
       <div style="margin-bottom:40px;">
-        <p style="font-size:13px; font-weight:600; margin:0 0 10px;">Répartition Financière du CA :</p>
-        <!-- Graphique : Barre empilée CSS -->
+        <p style="font-size:13px; font-weight:600; margin:0 0 10px;">Répartition Financière du CA Global :</p>
         <div style="display:flex; width:100%; height:24px; border-radius:12px; overflow:hidden; background:#EFEAE0; border:1px solid #DBD3C0;">
           ${achatPct > 0 ? `<div style="width:${achatPct}%; background:#3B6E8F; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:bold; overflow:hidden;" title="Achats">Achats</div>` : ''}
           ${fraisPct > 0 ? `<div style="width:${fraisPct}%; background:#B5482E; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:bold; overflow:hidden;" title="Frais">Frais</div>` : ''}
@@ -725,7 +783,7 @@ window.printArchiveLot = function(lotName){
             <th style="padding:10px; border-bottom:1px solid #DBD3C0;">Achat</th>
             <th style="padding:10px; border-bottom:1px solid #DBD3C0;">Frais div.</th>
             <th style="padding:10px; border-bottom:1px solid #DBD3C0;">Vente CA</th>
-            <th style="padding:10px; border-bottom:1px solid #DBD3C0; text-align:right;">Bénéfice</th>
+            <th style="padding:10px; border-bottom:1px solid #DBD3C0; text-align:right;">Bénéfice (Global)</th>
           </tr>
         </thead>
         <tbody>
