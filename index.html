@@ -100,7 +100,7 @@
   .section-title{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-soft);margin:22px 0 12px;display:flex;justify-content:space-between;align-items:center;}
 
   .tag{position:relative;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 16px 14px 20px;margin-bottom:14px;}
-  .tag::before{content:"";position:absolute;left:-1px;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--cat-color, var(--mustard));}
+  .tag::before{content:"absolute";position:absolute;left:-1px;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--cat-color, var(--mustard)); content:"";}
   .tag.expense::before{background:var(--rust);}
   .tag-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
   .tag-name{font-family:'Fraunces',serif;font-weight:600;font-size:16px;}
@@ -113,6 +113,7 @@
   .link-btn{background:none;border:none;color:var(--ink-soft);font-size:11.5px;cursor:pointer;text-decoration:underline;padding:0;font-family:'Inter',sans-serif;}
   .link-btn:hover{color:var(--rust);}
   .link-btn.edit:hover{color:var(--green);}
+  .link-btn.dup:hover{color:var(--mustard);}
   .link-btn.sell{color:var(--green);font-weight:600;}
 
   .empty{text-align:center;padding:34px 20px;color:var(--ink-soft);background:var(--card);border:1px dashed var(--border);border-radius:14px;font-size:13.5px;}
@@ -255,8 +256,24 @@ function renderDashboard(){
   });
   const avgMargin = marginCount ? totalMargin / marginCount : 0;
   
-  // Top 5 basé sur MA PART de bénéfice
-  const topSales = [...sales].sort((a,b) => myProfit(b) - myProfit(a)).slice(0, 5);
+  // Dédoublonnage du Top 5 : on regroupe par nom exact de l'article
+  const groupedSales = {};
+  sales.forEach(s => {
+    const n = s.nom.trim();
+    if(!groupedSales[n]) groupedSales[n] = { nom: n, profit: 0, count: 0 };
+    groupedSales[n].profit += myProfit(s);
+    groupedSales[n].count += 1;
+  });
+  // Tri par profit total décroissant
+  const topSales = Object.values(groupedSales).sort((a,b) => b.profit - a.profit).slice(0, 5);
+
+  // Calcul répartition par plateforme
+  const platStats = {};
+  sales.forEach(s => {
+    if(!platStats[s.plateforme]) platStats[s.plateforme] = 0;
+    platStats[s.plateforme] += myProfit(s);
+  });
+  const platArray = Object.entries(platStats).sort((a,b)=>b[1]-a[1]);
 
   let chartData = [];
   let maxChartProfit = 1;
@@ -293,20 +310,32 @@ function renderDashboard(){
       </div>
     </div>
     
-    <div class="card">
-      <p class="card-title">🏆 Top 5 des ventes (Ma part)</p>
-  `;
-  
-  if(topSales.length === 0) html += `<div class="empty">Aucune vente enregistrée.</div>`;
-  else html += `<div class="ranking-list">` + topSales.map((s, i) => `
-      <div class="ranking-item">
-        <div class="rank-num">${i+1}</div>
-        <div class="rank-info"><strong>${esc(s.nom)}</strong><br><span style="font-size:11px;color:var(--ink-soft);">${esc(s.plateforme)} • Achat total: ${fmt(s.achat)}</span></div>
-        <div class="rank-profit" style="color:var(--green);font-weight:bold;">+ ${fmt(myProfit(s))}</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+      <div class="card" style="margin-bottom:16px;">
+        <p class="card-title">🏆 Top Articles</p>
+        ${topSales.length === 0 ? `<div class="empty" style="padding:15px;">Vide</div>` : 
+        `<div class="ranking-list">` + topSales.map((s, i) => `
+            <div class="ranking-item" style="padding:8px; gap:8px;">
+              <div class="rank-num" style="font-size:14px; width:16px;">${i+1}</div>
+              <div class="rank-info" style="font-size:13px;"><strong>${esc(s.nom)}</strong> ${s.count>1 ? `<span style="font-size:10px; opacity:0.7;">(x${s.count})</span>`:''}</div>
+              <div class="rank-profit" style="color:var(--green);font-size:13px;font-weight:bold;">+${fmt(s.profit)}</div>
+            </div>
+          `).join('') + `</div>`
+        }
       </div>
-    `).join('') + `</div>`;
-    
-  html += `</div>`;
+      
+      <div class="card" style="margin-bottom:16px;">
+        <p class="card-title">📱 Plateformes</p>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          ${platArray.length ? platArray.map(p => `
+            <div style="display:flex; justify-content:space-between; font-size:13px; padding:8px; background:var(--paper-alt); border-radius:8px;">
+              <strong>${esc(p[0])}</strong> <span style="color:${p[1]>=0?'var(--green)':'var(--rust)'}; font-weight:bold;">${fmt(p[1])}</span>
+            </div>
+          `).join('') : '<div class="empty" style="padding:15px;">Vide</div>'}
+        </div>
+      </div>
+    </div>
+  `;
   el.innerHTML = html;
 }
 
@@ -377,6 +406,7 @@ function saleCardHtml(s){
           ${isSplit ? `<div style="font-size:10px; color:var(--ink-soft); font-weight:600; margin-top:2px;">Ma part: ${fmt(myP)}</div>` : ''}
         </div>
         <div class="tag-actions">
+          <button class="link-btn dup" data-dup="${s.id}">Copier</button>
           <button class="link-btn edit" data-edit="${s.id}">Modifier</button>
           <button class="link-btn" data-del="${s.id}">Supprimer</button>
         </div>
@@ -389,6 +419,13 @@ function bindSaleCardEvents(){
   document.querySelectorAll('[data-cancel-edit]').forEach(b => b.addEventListener('click', ()=>{ editingSaleId = null; renderVentes(); }));
   document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', e=>{
     if(confirm('Supprimer cette vente ?')){ sales = sales.filter(s=>s.id!==e.target.getAttribute('data-del')); saveSales(); renderAll(); }
+  }));
+  document.querySelectorAll('[data-dup]').forEach(b => b.addEventListener('click', e=>{
+    const s = sales.find(x=>x.id===e.target.getAttribute('data-dup'));
+    if(s){
+      sales.push({ ...s, id: uid(), nom: s.nom + ' (Copie)', dateVente: todayStr() });
+      saveSales(); renderAll(); showToast('Vente dupliquée !');
+    }
   }));
   document.querySelectorAll('[data-save-edit]').forEach(b => b.addEventListener('click', e=>{
     const s = sales.find(x=>x.id===e.target.getAttribute('data-save-edit'));
@@ -469,6 +506,7 @@ function stockCardHtml(s){
         <div><span style="font-size:11px; color:var(--ink-soft);">${esc(s.plateforme)}</span></div>
         <div class="tag-actions">
           <button class="link-btn sell" data-sell="${s.id}">💰 Vendre</button>
+          <button class="link-btn dup" data-dup-stock="${s.id}">Copier</button>
           <button class="link-btn edit" data-edit-stock="${s.id}">Modifier</button>
           <button class="link-btn" data-del-stock="${s.id}">Supprimer</button>
         </div>
@@ -490,6 +528,13 @@ function bindStockCardEvents(){
   }));
   document.querySelectorAll('[data-del-stock]').forEach(b => b.addEventListener('click', e=>{
     if(confirm('Supprimer cet article du stock ?')){ stock = stock.filter(s=>s.id!==e.target.getAttribute('data-del-stock')); saveStock(); renderAll(); }
+  }));
+  document.querySelectorAll('[data-dup-stock]').forEach(b => b.addEventListener('click', e=>{
+    const s = stock.find(x=>x.id===e.target.getAttribute('data-dup-stock'));
+    if(s){
+      stock.push({ ...s, id: uid(), nom: s.nom + ' (Copie)' });
+      saveStock(); renderAll(); showToast('Article dupliqué !');
+    }
   }));
   document.querySelectorAll('[data-sell]').forEach(b => b.addEventListener('click', e=>{ sellingStockId = e.target.getAttribute('data-sell'); editingStockId = null; renderStock(); }));
   document.querySelectorAll('[data-cancel-sell]').forEach(b => b.addEventListener('click', ()=>{ sellingStockId = null; renderStock(); }));
@@ -803,7 +848,12 @@ window.printArchiveLot = function(lotName){
     </div>
   `;
   document.getElementById('print-area').innerHTML = html;
+  
+  // Changement dynamique du titre de la page pour le nom du fichier PDF
+  const originalTitle = document.title;
+  document.title = `Fiche_Rentabilite_${lotName.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
   window.print();
+  document.title = originalTitle;
 }
 
 /* ---------- NAVIGATION ---------- */
